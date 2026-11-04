@@ -1,0 +1,57 @@
+{
+  "id": "/",
+  "name": "IamKomik — Komik & Anime Tanpa Ribet",
+  "short_name": "IamKomik",
+  "description": "Jelajahi komik dan anime terbaru dengan tampilan ala Pinterest. Simpan favorit, lanjut baca, dan pantau statistik bacaan lo.",
+  "lang": "id",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#faf9f7",
+  "theme_color": "#faf9f7",
+  "categories": ["entertainment", "books", "news"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Jelajah komik",
+      "short_name": "Jelajah",
+      "description": "Cari komik berdasarkan judul atau genre.",
+      "url": "/jelajah",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Koleksi gue",
+      "short_name": "Koleksi",
+      "description": "Favorit dan riwayat baca lo.",
+      "url": "/koleksi",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Statistik bacaan",
+      "short_name": "Statistik",
+      "description": "Lihat streak dan kebiasaan baca lo.",
+      "url": "/dashboard",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

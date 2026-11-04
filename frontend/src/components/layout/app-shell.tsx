@@ -1,0 +1,29 @@
+import { useLocation } from "react-router-dom"
+
+import { MobileNav } from "@/components/layout/mobile-nav"
+import { SiteFooter } from "@/components/layout/site-footer"
+import { SiteHeader } from "@/components/layout/site-header"
+import { OfflineBanner } from "@/components/offline-banner"
+import { PwaInstall } from "@/components/pwa-install"
+import { cn } from "@/lib/utils"
+
+export function AppShell({ children }: { children: React.ReactNode }) {
+  const location = useLocation()
+  const immersive = location.pathname.startsWith("/baca/")
+
+  return (
+    <div
+      className={cn(
+        "flex min-h-dvh flex-col",
+        immersive ? "" : "pb-[calc(5.9rem+env(safe-area-inset-bottom))] md:pb-0",
+      )}
+    >
+      {!immersive ? <SiteHeader /> : null}
+      {!immersive ? <OfflineBanner /> : null}
+      <main className="flex-1">{children}</main>
+      {!immersive ? <SiteFooter /> : null}
+      {!immersive ? <MobileNav /> : null}
+      {!immersive ? <PwaInstall /> : null}
+    </div>
+  )
+}
