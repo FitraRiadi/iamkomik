@@ -23,30 +23,29 @@ export function MobileNav() {
             key={item.to}
             to={item.to}
             end={item.end}
+            aria-label={item.label}
+            title={item.label}
             className={({ isActive }) =>
               cn(
-                "group flex min-w-0 flex-1 flex-col items-center gap-1 rounded-[1.35rem] px-0.5 py-1.5 text-[9.5px] font-bold leading-none tracking-[-0.01em] text-muted-foreground transition-colors",
+                "group flex min-w-0 flex-1 items-center justify-center px-0.5 py-1 text-muted-foreground transition-colors",
                 isActive && "text-primary",
               )
             }
           >
             {({ isActive }) => (
-              <>
-                <span
-                  className={cn(
-                    "grid h-8 w-full max-w-[52px] place-items-center rounded-full transition-all duration-200",
-                    isActive
-                      ? "bg-primary text-primary-foreground shadow-glow"
-                      : "group-hover:bg-secondary group-active:scale-95",
-                  )}
-                >
-                  <item.icon
-                    className={cn("h-[17px] w-[17px]", isActive && "stroke-[2.5]")}
-                    aria-hidden
-                  />
-                </span>
-                <span className="max-w-full truncate">{item.label}</span>
-              </>
+              <span
+                className={cn(
+                  "grid h-10 w-full max-w-[56px] place-items-center rounded-full transition-all duration-200",
+                  isActive
+                    ? "bg-primary text-primary-foreground shadow-glow"
+                    : "group-hover:bg-secondary group-active:scale-95",
+                )}
+              >
+                <item.icon
+                  className={cn("h-[22px] w-[22px]", isActive && "stroke-[2.5]")}
+                  aria-hidden
+                />
+              </span>
             )}
           </NavLink>
         ))}
