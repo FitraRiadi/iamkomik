@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useApiQuery } from "@/hooks/use-api-query"
+import { useI18n } from "@/lib/i18n"
 import type { AnimeCard as AnimeCardType, AnimeHomePayload } from "@/lib/types"
 
 interface AnimeSearchPayload {
@@ -19,6 +20,7 @@ interface AnimeSearchPayload {
 
 export function AnimePage() {
   const navigate = useNavigate()
+  const { t } = useI18n()
   const [query, setQuery] = React.useState("")
   const [debounced, setDebounced] = React.useState("")
 
@@ -72,11 +74,10 @@ export function AnimePage() {
               Anime
             </Badge>
             <h1 className="headline mt-4 text-4xl text-balance text-white sm:text-5xl">
-              Anime ongoing, tamat, sampai yang lagi hype.
+              {t("Anime ongoing, tamat, sampai yang lagi hype.")}
             </h1>
             <p className="mt-2 max-w-lg text-sm leading-relaxed text-white/70">
-              Cari judul, lihat episode, dan tonton langsung dari sumbernya. Semua dalam satu
-              tempat.
+              {t("Cari judul, lihat episode, dan tonton langsung dari sumbernya. Semua dalam satu tempat.")}
             </p>
 
             <form
@@ -87,11 +88,11 @@ export function AnimePage() {
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Cari anime…"
+                placeholder={t("Cari anime…")}
                 className="h-10 w-full bg-transparent text-sm font-medium text-white outline-none placeholder:text-white/50"
               />
               <Button type="submit" size="sm" className="h-10 shrink-0 bg-white px-5 text-black hover:bg-white/90">
-                Cari
+                {t("Cari")}
               </Button>
             </form>
           </div>
@@ -101,11 +102,13 @@ export function AnimePage() {
           <section className="py-10">
             <div className="mb-5 flex items-center justify-between">
               <div>
-                <p className="eyebrow">Pencarian</p>
-                <h2 className="headline mt-1 text-2xl">Hasil untuk “{debounced}”</h2>
+                <p className="eyebrow">{t("Pencarian")}</p>
+                <h2 className="headline mt-1 text-2xl">
+                  {t("Hasil untuk “{query}”", { query: debounced })}
+                </h2>
               </div>
               <Button variant="ghost" size="sm" onClick={() => { setQuery(""); setDebounced("") }}>
-                Reset
+                {t("Reset")}
               </Button>
             </div>
             {search.loading ? (
@@ -113,9 +116,9 @@ export function AnimePage() {
             ) : results.length === 0 ? (
               <EmptyState
                 icon={Search}
-                title="Anime gak ketemu"
-                description="Coba kata kunci lain, atau kembali ke daftar ongoing."
-                actionLabel="Balik ke anime"
+                title={t("Anime gak ketemu")}
+                description={t("Coba kata kunci lain, atau kembali ke daftar ongoing.")}
+                actionLabel={t("Balik ke anime")}
                 actionHref="/anime"
               />
             ) : (
@@ -130,10 +133,10 @@ export function AnimePage() {
           <>
             <section className="py-10">
               <SectionHeading
-                eyebrow="Sedang tayang"
-                title="Anime ongoing"
-                description="Update episode terbaru dari sumber yang tersedia."
-                actionLabel="Cari anime"
+                eyebrow={t("Sedang tayang")}
+                title={t("Anime ongoing")}
+                description={t("Update episode terbaru dari sumber yang tersedia.")}
+                actionLabel={t("Cari anime")}
                 actionHref="/anime"
               />
               {loading ? (
@@ -141,22 +144,22 @@ export function AnimePage() {
               ) : error ? (
                 <EmptyState
                   icon={RefreshCw}
-                  title="Gagal ambil data anime"
+                  title={t("Gagal ambil data anime")}
                   description={error}
-                  actionLabel="Coba lagi"
+                  actionLabel={t("Coba lagi")}
                   actionHref="/anime"
                 >
                   <Button variant="outline" size="sm" className="mt-4" onClick={refetch}>
                     <RefreshCw className="h-3.5 w-3.5" />
-                    Muat ulang
+                    {t("Muat ulang")}
                   </Button>
                 </EmptyState>
               ) : (data?.ongoing ?? []).length === 0 ? (
                 <EmptyState
                   icon={Sparkles}
-                  title="Belum ada anime ongoing"
-                  description="Sumbernya lagi kosong. Coba cek lagi nanti."
-                  actionLabel="Balik ke beranda"
+                  title={t("Belum ada anime ongoing")}
+                  description={t("Sumbernya lagi kosong. Coba cek lagi nanti.")}
+                  actionLabel={t("Balik ke beranda")}
                   actionHref="/"
                 />
               ) : (
@@ -176,9 +179,9 @@ export function AnimePage() {
             {(data?.complete ?? []).length > 0 ? (
               <section className="pb-10">
                 <SectionHeading
-                  eyebrow="Binge watch"
-                  title="Yang sudah tamat"
-                  description="Cocok buat maraton akhir pekan."
+                  eyebrow={t("Binge watch")}
+                  title={t("Yang sudah tamat")}
+                  description={t("Cocok buat maraton akhir pekan.")}
                 />
                 <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                   {(data?.complete ?? []).map((anime, index) => (
@@ -195,14 +198,14 @@ export function AnimePage() {
                     <Clapperboard className="h-5 w-5" />
                   </span>
                   <div>
-                    <p className="text-sm font-bold">Anime di sini pakai sumber Otakudesu</p>
+                    <p className="text-sm font-bold">{t("Anime di sini pakai sumber Otakudesu")}</p>
                     <p className="text-xs text-muted-foreground">
-                      Streaming dan download link disediakan langsung oleh API.
+                      {t("Streaming dan download link disediakan langsung oleh API.")}
                     </p>
                   </div>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => navigate("/dashboard")}>
-                  Lihat statistik
+                  {t("Lihat statistik")}
                 </Button>
               </div>
             </section>

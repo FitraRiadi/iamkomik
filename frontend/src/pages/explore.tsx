@@ -20,6 +20,7 @@ import { PageTransition } from "@/components/page-transition"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useApiQuery } from "@/hooks/use-api-query"
+import { useI18n } from "@/lib/i18n"
 import type { ComicCard as ComicCardType, Genre } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
@@ -32,6 +33,7 @@ interface GenresPayload {
 }
 
 export function ExplorePage() {
+  const { t } = useI18n()
   const [searchParams, setSearchParams] = useSearchParams()
   const query = searchParams.get("q")?.trim() ?? ""
   const genre = searchParams.get("genre") ?? ""
@@ -100,23 +102,22 @@ export function ExplorePage() {
           <div className="absolute -right-10 -top-16 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
           <div className="relative flex flex-col justify-between gap-6 md:flex-row md:items-end">
             <div>
-              <p className="eyebrow">Jelajah</p>
+              <p className="eyebrow">{t("Jelajah")}</p>
               <h1 className="headline mt-2 text-4xl text-balance sm:text-5xl">
-                Temukan bacaan baru.
+                {t("Temukan bacaan baru.")}
               </h1>
               <p className="mt-2 max-w-lg text-sm leading-relaxed text-muted-foreground">
-                Cari berdasarkan judul atau pilih genre. Semua hasil diambil langsung dari
-                sumbernya, jadi update-nya cepat.
+                {t("Cari berdasarkan judul atau pilih genre. Semua hasil diambil langsung dari sumbernya, jadi update-nya cepat.")}
               </p>
             </div>
             <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
               <Badge variant="soft" className="gap-1.5 px-3 py-1.5">
                 <Sparkles className="h-3 w-3" />
-                {loading ? "Memuat…" : `${results.length} judul`}
+                {loading ? t("Memuat…") : t("{count} judul", { count: results.length })}
               </Badge>
               <Button variant="outline" size="sm" onClick={() => setSeed((value) => value + 1)}>
                 <Shuffle className="h-3.5 w-3.5" />
-                Acak
+                {t("Acak")}
               </Button>
             </div>
           </div>
@@ -129,7 +130,7 @@ export function ExplorePage() {
             <input
               value={input}
               onChange={(event) => setInput(event.target.value)}
-              placeholder="Cari judul komik, manga, manhwa…"
+              placeholder={t("Cari judul komik, manga, manhwa…")}
               className="h-11 w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground/80"
             />
             {input || query ? (
@@ -137,13 +138,13 @@ export function ExplorePage() {
                 type="button"
                 onClick={clearFilters}
                 className="rounded-full p-2 text-muted-foreground transition hover:bg-secondary hover:text-foreground"
-                aria-label="Hapus pencarian"
+                aria-label={t("Hapus pencarian")}
               >
                 <X className="h-4 w-4" />
               </button>
             ) : null}
             <Button type="submit" size="sm" className="h-11 shrink-0 px-5">
-              Cari
+              {t("Cari")}
               <ArrowRight className="h-4 w-4" />
             </Button>
           </form>
@@ -159,7 +160,7 @@ export function ExplorePage() {
                   : "border-border/70 bg-background text-muted-foreground hover:border-primary/30 hover:text-foreground",
               )}
             >
-              Trending
+              {t("Trending")}
             </button>
             {(genreData?.results ?? []).map((item) => (
               <button
@@ -183,25 +184,25 @@ export function ExplorePage() {
           <div>
             <h2 className="headline text-2xl">
               {query
-                ? `Hasil untuk “${query}”`
+                ? t("Hasil untuk “{query}”", { query })
                 : activeGenreName
-                  ? `Genre ${activeGenreName}`
-                  : "Lagi trending hari ini"}
+                  ? t("Genre {genre}", { genre: activeGenreName })
+                  : t("Lagi trending hari ini")}
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
               {query || genre ? (
                 <button type="button" onClick={clearFilters} className="font-semibold text-primary hover:underline">
-                  Reset filter
+                  {t("Reset filter")}
                 </button>
               ) : (
-                "Paling banyak dibuka pembaca IamKomik."
+                t("Paling banyak dibuka pembaca IamKomik.")
               )}
             </p>
           </div>
           {(query || genre) && (
             <Badge variant="outline" className="hidden shrink-0 sm:inline-flex">
               <Compass className="h-3 w-3" />
-              Filter aktif
+              {t("Filter aktif")}
             </Badge>
           )}
         </div>
@@ -212,22 +213,22 @@ export function ExplorePage() {
           ) : error ? (
             <EmptyState
               icon={RefreshCw}
-              title="Gagal ambil data"
+              title={t("Gagal ambil data")}
               description={error}
-              actionLabel="Coba lagi"
+              actionLabel={t("Coba lagi")}
               actionHref="/jelajah"
             >
               <Button variant="outline" size="sm" className="mt-4" onClick={refetch}>
                 <RefreshCw className="h-3.5 w-3.5" />
-                Muat ulang
+                {t("Muat ulang")}
               </Button>
             </EmptyState>
           ) : results.length === 0 ? (
             <EmptyState
               icon={Search}
-              title="Gak ada hasil"
-              description="Coba kata kunci yang lebih pendek, atau pilih genre lain di atas."
-              actionLabel="Kembali ke trending"
+              title={t("Gak ada hasil")}
+              description={t("Coba kata kunci yang lebih pendek, atau pilih genre lain di atas.")}
+              actionLabel={t("Kembali ke trending")}
               actionHref="/jelajah"
             />
           ) : (
@@ -247,15 +248,15 @@ export function ExplorePage() {
               <Compass className="h-5 w-5" />
             </span>
             <div>
-              <p className="text-sm font-bold">Mau lihat yang lagi update?</p>
+              <p className="text-sm font-bold">{t("Mau lihat yang lagi update?")}</p>
               <p className="text-xs text-muted-foreground">
-                Halaman beranda nampilin chapter terbaru dari semua sumber.
+                {t("Halaman beranda nampilin chapter terbaru dari semua sumber.")}
               </p>
             </div>
           </div>
           <Button asChild variant="outline" size="sm">
             <Link to="/">
-              Balik ke beranda
+              {t("Balik ke beranda")}
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </Button>

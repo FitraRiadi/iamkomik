@@ -22,6 +22,7 @@ import {
 import { useApiQuery } from "@/hooks/use-api-query"
 import { useLibrary } from "@/hooks/use-library"
 import { useTheme } from "@/components/theme-provider"
+import { useI18n } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
 import type { ChapterDetail, ComicDetail } from "@/lib/types"
 
@@ -30,6 +31,7 @@ export function ReaderPage() {
   const navigate = useNavigate()
   const { theme, toggleTheme } = useTheme()
   const { refresh } = useLibrary()
+  const { t } = useI18n()
   const [progress, setProgress] = React.useState(0)
 
   const {
@@ -97,18 +99,18 @@ export function ReaderPage() {
           <Link
             to={`/komik/${encodeURIComponent(slug)}`}
             className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-zinc-400 transition hover:bg-white/10 hover:text-white"
-            aria-label="Kembali ke detail komik"
+            aria-label={t("Kembali ke detail komik")}
           >
             <ArrowLeft className="h-[18px] w-[18px]" />
           </Link>
 
           <div className="min-w-0 flex-1">
             <p className="truncate text-[12px] font-bold leading-tight text-zinc-200">
-              {chapter?.comic?.title || comic?.title || chapter?.manga_title || "Memuat…"}
+              {chapter?.comic?.title || comic?.title || chapter?.manga_title || t("Memuat…")}
             </p>
             <p className="truncate text-[10.5px] font-medium text-zinc-500">
-              {chapter?.chapter_title || "Chapter"}
-              {chapter?.page_count ? ` · ${chapter.page_count} gambar` : ""}
+              {chapter?.chapter_title || t("Chapter")}
+              {chapter?.page_count ? ` · ${t("{count} gambar", { count: chapter.page_count })}` : ""}
             </p>
           </div>
 
@@ -116,7 +118,7 @@ export function ReaderPage() {
             {chapters.length > 0 ? (
               <Select value={chapterSlug} onValueChange={goToChapter}>
                 <SelectTrigger className="h-9 w-[148px] border-white/15 bg-white/5 text-[11px] text-zinc-200 focus:ring-primary/40 sm:w-[180px]">
-                  <SelectValue placeholder="Pilih chapter" />
+                  <SelectValue placeholder={t("Pilih chapter")} />
                 </SelectTrigger>
                 <SelectContent className="max-h-72">
                   {chapters.map((item) => (
@@ -133,14 +135,14 @@ export function ReaderPage() {
               className="hidden h-9 items-center gap-1.5 rounded-full border border-white/15 px-3 text-[11px] font-bold text-zinc-300 transition hover:bg-white/10 sm:inline-flex"
             >
               <List className="h-3.5 w-3.5" />
-              Chapter
+              {t("Chapter")}
             </Link>
 
             <button
               type="button"
               onClick={toggleTheme}
               className="grid h-9 w-9 place-items-center rounded-full text-zinc-400 transition hover:bg-white/10 hover:text-white"
-              aria-label="Ganti tema"
+              aria-label={t("Ganti tema")}
             >
               {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
@@ -157,17 +159,17 @@ export function ReaderPage() {
       {loading ? (
         <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3 text-zinc-500">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          <p className="text-xs font-medium">Menyiapkan halaman…</p>
+          <p className="text-xs font-medium">{t("Menyiapkan halaman…")}</p>
         </div>
       ) : error ? (
         <div className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center gap-3 px-6 text-center">
           <span className="grid h-14 w-14 place-items-center rounded-2xl bg-white/5">
             <ImageOff className="h-6 w-6 text-zinc-500" />
           </span>
-          <h1 className="font-display text-xl font-bold">Chapter gak bisa dibuka</h1>
+          <h1 className="font-display text-xl font-bold">{t("Chapter gak bisa dibuka")}</h1>
           <p className="text-sm text-zinc-500">{error}</p>
           <Button asChild className="mt-2">
-            <Link to={`/komik/${encodeURIComponent(slug)}`}>Balik ke detail komik</Link>
+            <Link to={`/komik/${encodeURIComponent(slug)}`}>{t("Balik ke detail komik")}</Link>
           </Button>
         </div>
       ) : chapter ? (
@@ -183,13 +185,15 @@ export function ReaderPage() {
               <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
                 <div className="text-center sm:text-left">
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
-                    Chapter selesai
+                    {t("Chapter selesai")}
                   </p>
                   <p className="mt-1 font-display text-lg font-bold text-white">
                     {chapter.chapter_title}
                   </p>
                   <p className="mt-0.5 text-xs text-zinc-500">
-                    Progres lo otomatis kesimpan. {progress.toFixed(0)}% halaman kebaca.
+                    {t("Progres lo otomatis kesimpan. {percent}% halaman kebaca.", {
+                      percent: progress.toFixed(0),
+                    })}
                   </p>
                 </div>
                 <div className="flex w-full gap-2 sm:w-auto">
@@ -200,14 +204,14 @@ export function ReaderPage() {
                     onClick={() => goToChapter(chapter.previous_chapter)}
                   >
                     <ChevronLeft className="h-4 w-4" />
-                    Sebelumnya
+                    {t("Sebelumnya")}
                   </Button>
                   <Button
                     className="flex-1 sm:flex-none"
                     disabled={!chapter.next_chapter}
                     onClick={() => goToChapter(chapter.next_chapter)}
                   >
-                    Selanjutnya
+                    {t("Selanjutnya")}
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
@@ -216,7 +220,7 @@ export function ReaderPage() {
               {chapters.length > 0 ? (
                 <div className="mt-5 border-t border-white/10 pt-4">
                   <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
-                    Lompat ke chapter
+                    {t("Lompat ke chapter")}
                   </p>
                   <div className="no-scrollbar flex gap-1.5 overflow-x-auto pb-1">
                     {chapters.slice(0, 40).map((item) => (
@@ -241,7 +245,7 @@ export function ReaderPage() {
 
             <div className="mt-8 flex items-center justify-center gap-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-600">
               <span className="h-px w-10 bg-white/10" />
-              Gunakan ← → buat pindah chapter
+              {t("Gunakan ← → buat pindah chapter")}
               <span className="h-px w-10 bg-white/10" />
             </div>
           </div>
@@ -252,6 +256,7 @@ export function ReaderPage() {
 }
 
 function ReaderImage({ src, index }: { src: string; index: number }) {
+  const { t } = useI18n()
   const [loaded, setLoaded] = React.useState(false)
   const [failed, setFailed] = React.useState(false)
 
@@ -259,7 +264,9 @@ function ReaderImage({ src, index }: { src: string; index: number }) {
     return (
       <div className="flex min-h-[180px] flex-col items-center justify-center gap-2 rounded-xl border border-white/5 bg-white/[0.02] px-4 text-center">
         <ImageOff className="h-5 w-5 text-zinc-600" />
-        <p className="text-[11px] text-zinc-500">Gambar halaman {index + 1} gagal dimuat.</p>
+        <p className="text-[11px] text-zinc-500">
+          {t("Gambar halaman {page} gagal dimuat.", { page: index + 1 })}
+        </p>
       </div>
     )
   }
@@ -273,7 +280,7 @@ function ReaderImage({ src, index }: { src: string; index: number }) {
       ) : null}
       <img
         src={src}
-        alt={`Halaman ${index + 1}`}
+        alt={t("Halaman {page}", { page: index + 1 })}
         loading={index < 2 ? "eager" : "lazy"}
         decoding="async"
         referrerPolicy="no-referrer"

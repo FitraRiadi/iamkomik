@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useApiQuery } from "@/hooks/use-api-query"
+import { useI18n } from "@/lib/i18n"
 import type { ComicCard as ComicCardType } from "@/lib/types"
 
 interface SearchDialogProps {
@@ -26,6 +27,7 @@ interface SearchResponse {
 
 export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
   const navigate = useNavigate()
+  const { t } = useI18n()
   const [query, setQuery] = React.useState("")
   const [debounced, setDebounced] = React.useState("")
 
@@ -51,8 +53,8 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="top-[12%] max-w-xl translate-y-0 gap-3 p-0 sm:rounded-3xl">
         <DialogHeader className="sr-only">
-          <DialogTitle>Cari komik</DialogTitle>
-          <DialogDescription>Telusuri judul komik dari berbagai sumber.</DialogDescription>
+          <DialogTitle>{t("Cari komik")}</DialogTitle>
+          <DialogDescription>{t("Telusuri judul komik dari berbagai sumber.")}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={submit} className="flex items-center gap-3 border-b border-border/70 px-5 py-4">
@@ -61,14 +63,14 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
             autoFocus
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Cari judul komik…"
+            placeholder={t("Cari judul komik…")}
             className="h-10 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
           />
           <button
             type="submit"
             className="rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground"
           >
-            Cari
+            {t("Cari")}
           </button>
         </form>
 
@@ -76,7 +78,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
           {query.trim().length < 2 ? (
             <div className="space-y-3 px-2 py-3">
               <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
-                Coba cari
+                {t("Coba cari")}
               </p>
               <div className="flex flex-wrap gap-2">
                 {["Solo Leveling", "One Piece", "Manhwa", "Romance", "Action"].map((keyword) => (
@@ -111,23 +113,23 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
                   comic={comic}
                   index={index}
                   showSave={false}
-                  chapterLabel={comic.chapter || "Lihat detail"}
+                  chapterLabel={comic.chapter || t("Lihat detail")}
                 />
               ))}
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2 px-4 py-10 text-center">
               <Sparkles className="h-6 w-6 text-primary" />
-              <p className="text-sm font-semibold">Belum ketemu hasilnya</p>
+              <p className="text-sm font-semibold">{t("Belum ketemu hasilnya")}</p>
               <p className="text-xs text-muted-foreground">
-                Coba kata kunci lain atau buka halaman jelajah.
+                {t("Coba kata kunci lain atau buka halaman jelajah.")}
               </p>
               <Link
                 to={`/jelajah?q=${encodeURIComponent(query.trim())}`}
                 onClick={() => onOpenChange(false)}
                 className="mt-2 text-xs font-bold text-primary hover:underline"
               >
-                Lihat semua hasil
+                {t("Lihat semua hasil")}
               </Link>
             </div>
           )}

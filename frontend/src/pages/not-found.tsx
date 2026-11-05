@@ -3,8 +3,11 @@ import { ArrowLeft, Compass, Ghost } from "lucide-react"
 
 import { PageTransition } from "@/components/page-transition"
 import { Button } from "@/components/ui/button"
+import { useI18n } from "@/lib/i18n"
 
 export function NotFoundPage() {
+  const { t } = useI18n()
+
   return (
     <PageTransition>
       <div className="container flex min-h-[70vh] flex-col items-center justify-center py-16 text-center">
@@ -16,22 +19,21 @@ export function NotFoundPage() {
             <Ghost className="h-7 w-7" />
           </span>
         </div>
-        <h1 className="headline mt-2 text-3xl">Halaman ini hilang entah ke mana.</h1>
+        <h1 className="headline mt-2 text-3xl">{t("Halaman ini hilang entah ke mana.")}</h1>
         <p className="mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
-          Mungkin link-nya salah, atau chapter yang lo cari udah dipindahin. Balik dulu aja, masih
-          banyak komik lain.
+          {t("Mungkin link-nya salah, atau chapter yang lo cari udah dipindahin. Balik dulu aja, masih banyak komik lain.")}
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <Button asChild>
             <Link to="/">
               <ArrowLeft className="h-4 w-4" />
-              Balik ke beranda
+              {t("Balik ke beranda")}
             </Link>
           </Button>
           <Button asChild variant="outline">
             <Link to="/jelajah">
               <Compass className="h-4 w-4" />
-              Jelajah komik
+              {t("Jelajah komik")}
             </Link>
           </Button>
         </div>

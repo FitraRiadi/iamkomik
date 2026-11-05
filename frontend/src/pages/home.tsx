@@ -27,11 +27,13 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useApiQuery } from "@/hooks/use-api-query"
 import { useLibrary } from "@/hooks/use-library"
 import { formatRelative } from "@/lib/format"
+import { useI18n } from "@/lib/i18n"
 import type { ComicCard as ComicCardType, HomePayload } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 export function HomePage() {
   const navigate = useNavigate()
+  const { t } = useI18n()
   const { data, loading, error, refetch } = useApiQuery<HomePayload>("/home/")
   const { history } = useLibrary()
   const [query, setQuery] = React.useState("")
@@ -62,7 +64,7 @@ export function HomePage() {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
               </span>
-              6.000+ komik · update tiap hari
+              {t("6.000+ komik · update tiap hari")}
             </motion.div>
 
             <motion.h1
@@ -71,10 +73,10 @@ export function HomePage() {
               transition={{ duration: 0.5, delay: 0.05 }}
               className="headline mt-5 text-[42px] leading-[0.98] text-balance sm:text-6xl xl:text-[68px]"
             >
-              Baca komik favorit,
+              {t("Baca komik favorit,")}
               <br />
               <span className="relative inline-block text-primary">
-                tanpa drama.
+                {t("tanpa drama.")}
                 <svg
                   className="absolute -bottom-2 left-0 h-3 w-full text-primary/25"
                   viewBox="0 0 300 12"
@@ -97,8 +99,7 @@ export function HomePage() {
               transition={{ duration: 0.5, delay: 0.12 }}
               className="mt-5 max-w-lg text-[15px] leading-relaxed text-muted-foreground"
             >
-              Ribuan judul dari berbagai sumber, dikumpulin jadi satu tampilan yang rapi.
-              Simpan yang lo suka, lanjutin bacaan kapan aja.
+              {t("Ribuan judul dari berbagai sumber, dikumpulin jadi satu tampilan yang rapi. Simpan yang lo suka, lanjutin bacaan kapan aja.")}
             </motion.p>
 
             <motion.form
@@ -112,11 +113,11 @@ export function HomePage() {
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Mau baca apa hari ini?"
+                placeholder={t("Mau baca apa hari ini?")}
                 className="h-11 w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground/80"
               />
               <Button type="submit" size="sm" className="h-11 shrink-0 px-5">
-                Cari komik
+                {t("Cari komik")}
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </motion.form>
@@ -128,7 +129,7 @@ export function HomePage() {
               className="mt-5 flex flex-wrap items-center gap-2"
             >
               <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
-                Populer
+                {t("Populer")}
               </span>
               {(genres.length ? genres.slice(0, 5) : [{ name: "Action", slug: "action" }, { name: "Romance", slug: "romance" }, { name: "Fantasy", slug: "fantasy" }]).map(
                 (genre) => (
@@ -152,7 +153,7 @@ export function HomePage() {
             <p className="text-sm font-medium text-destructive">{error}</p>
             <Button variant="outline" size="sm" onClick={refetch}>
               <RefreshCw className="h-3.5 w-3.5" />
-              Coba lagi
+              {t("Coba lagi")}
             </Button>
           </div>
         ) : null}
@@ -161,10 +162,10 @@ export function HomePage() {
 
         <section className="py-10">
           <SectionHeading
-            eyebrow="Lagi naik daun"
-            title="Yang ramai dibaca minggu ini"
-            description="Pilihan dari daftar trending — biasanya yang paling sering update."
-            actionLabel="Lihat semua"
+            eyebrow={t("Lagi naik daun")}
+            title={t("Yang ramai dibaca minggu ini")}
+            description={t("Pilihan dari daftar trending — biasanya yang paling sering update.")}
+            actionLabel={t("Lihat semua")}
             actionHref="/jelajah"
           />
           {loading ? (
@@ -184,7 +185,7 @@ export function HomePage() {
           <div className="mb-6 flex flex-wrap items-center gap-2.5 rounded-[5px] border border-border/60 bg-card/50 px-4 py-3.5">
             <span className="mr-1 inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
               <Sparkles className="h-3.5 w-3.5 text-primary" />
-              Genre
+              {t("Genre")}
             </span>
             {(genres.length ? genres : []).slice(0, 14).map((genre) => (
               <Link
@@ -199,7 +200,7 @@ export function HomePage() {
               to="/jelajah"
               className="ml-auto inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:underline"
             >
-              Semua genre
+              {t("Semua genre")}
               <ArrowUpRight className="h-3 w-3" />
             </Link>
           </div>
@@ -207,10 +208,10 @@ export function HomePage() {
 
         <section className="py-8">
           <SectionHeading
-            eyebrow="Baru update"
-            title="Chapter baru, jangan sampai kelewatan"
-            description="Diurutkan dari yang paling baru di-update oleh sumbernya."
-            actionLabel="Jelajah semua"
+            eyebrow={t("Baru update")}
+            title={t("Chapter baru, jangan sampai kelewatan")}
+            description={t("Diurutkan dari yang paling baru di-update oleh sumbernya.")}
+            actionLabel={t("Jelajah semua")}
             actionHref="/jelajah"
           />
           {loading ? (
@@ -232,14 +233,13 @@ export function HomePage() {
               <div className="max-w-xl">
                 <Badge variant="glass" className="border-white/20 bg-white/15 text-white">
                   <BarChart3 className="h-3 w-3" />
-                  Reading insights
+                  {t("Reading insights")}
                 </Badge>
                 <h2 className="headline mt-4 text-3xl text-balance sm:text-4xl">
-                  Lo udah baca berapa chapter minggu ini?
+                  {t("Lo udah baca berapa chapter minggu ini?")}
                 </h2>
                 <p className="mt-2 max-w-md text-sm leading-relaxed text-white/80">
-                  Semua aktivitas baca lo tercatat otomatis. Cek statistik, streak, dan genre
-                  favorit lo di dashboard.
+                  {t("Semua aktivitas baca lo tercatat otomatis. Cek statistik, streak, dan genre favorit lo di dashboard.")}
                 </p>
               </div>
               <Button
@@ -248,7 +248,7 @@ export function HomePage() {
                 className="shrink-0 bg-white text-primary hover:bg-white/90"
               >
                 <Link to="/dashboard">
-                  Buka dashboard
+                  {t("Buka dashboard")}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
@@ -262,6 +262,7 @@ export function HomePage() {
 }
 
 function HeroCollage({ comics, loading }: { comics: ComicCardType[]; loading: boolean }) {
+  const { t } = useI18n()
   const items = React.useMemo(() => comics.slice(0, 3), [comics])
   const [ordered, setOrdered] = React.useState<ComicCardType[]>(items)
 
@@ -361,8 +362,8 @@ function HeroCollage({ comics, loading }: { comics: ComicCardType[]; loading: bo
           <TrendingUp className="h-4 w-4" />
         </span>
         <div>
-          <p className="text-[10px] font-medium text-muted-foreground">Update hari ini</p>
-          <p className="text-xs font-bold">40+ chapter baru</p>
+          <p className="text-[10px] font-medium text-muted-foreground">{t("Update hari ini")}</p>
+          <p className="text-xs font-bold">{t("40+ chapter baru")}</p>
         </div>
       </motion.div>
     </div>
@@ -381,12 +382,13 @@ function ContinueReading({
     updated_at: string
   }>
 }) {
+  const { t, language } = useI18n()
   return (
     <section className="py-4">
       <SectionHeading
-        eyebrow="Lanjutin"
-        title="Masih penasaran sama ceritanya?"
-        actionLabel="Semua riwayat"
+        eyebrow={t("Lanjutin")}
+        title={t("Masih penasaran sama ceritanya?")}
+        actionLabel={t("Semua riwayat")}
         actionHref="/koleksi"
       />
       <div className="no-scrollbar -mx-1 flex snap-x gap-3 overflow-x-auto px-1 pb-2">
@@ -417,10 +419,10 @@ function ContinueReading({
                 </p>
                 <p className="mt-1 text-[11px] font-semibold text-primary">{item.chapter_name}</p>
                 <p className="mt-0.5 text-[10px] text-muted-foreground">
-                  {formatRelative(item.updated_at)}
+                  {formatRelative(item.updated_at, language)}
                 </p>
                 <span className="mt-2 inline-flex items-center gap-1 text-[10px] font-bold text-primary">
-                  Lanjut baca
+                  {t("Lanjut baca")}
                   <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
                 </span>
               </div>
@@ -433,6 +435,7 @@ function ContinueReading({
 }
 
 function EditorCarousel({ comics }: { comics: ComicCardType[] }) {
+  const { t } = useI18n()
   const [index, setIndex] = React.useState(0)
   const total = comics.length
 
@@ -483,14 +486,14 @@ function EditorCarousel({ comics }: { comics: ComicCardType[] }) {
               <div className="max-w-xl">
                 <Badge className="border-white/20 bg-white/15 text-white backdrop-blur">
                   <Flame className="h-3 w-3" />
-                  Pilihan editor
+                  {t("Pilihan editor")}
                 </Badge>
                 <h2 className="headline mt-4 line-clamp-2 text-3xl text-white sm:text-4xl">
                   {comic.title}
                 </h2>
                 <p className="mt-2 max-w-md text-sm leading-relaxed text-white/70">
-                  {comic.chapter ? `${comic.chapter} baru aja rilis. ` : ""}
-                  Buka detailnya buat lihat sinopsis, daftar chapter, dan rekomendasi serupa.
+                  {comic.chapter ? t("{chapter} baru aja rilis. ", { chapter: comic.chapter }) : ""}
+                  {t("Buka detailnya buat lihat sinopsis, daftar chapter, dan rekomendasi serupa.")}
                 </p>
                 <div className="mt-6 flex flex-wrap gap-2.5">
                   <Button
@@ -500,7 +503,7 @@ function EditorCarousel({ comics }: { comics: ComicCardType[] }) {
                   >
                     <Link to={`/komik/${encodeURIComponent(comic.slug)}`}>
                       <BookOpen className="h-4 w-4" />
-                      Lihat detail
+                      {t("Lihat detail")}
                     </Link>
                   </Button>
                   <Button
@@ -511,7 +514,7 @@ function EditorCarousel({ comics }: { comics: ComicCardType[] }) {
                   >
                     <Link to={`/komik/${encodeURIComponent(comic.slug)}`}>
                       <Bookmark className="h-4 w-4" />
-                      Simpan dulu
+                      {t("Simpan dulu")}
                     </Link>
                   </Button>
                 </div>
@@ -569,7 +572,7 @@ function EditorCarousel({ comics }: { comics: ComicCardType[] }) {
               variant="outline"
               size="icon-sm"
               onClick={() => move(-1)}
-              aria-label="Slide sebelumnya"
+              aria-label={t("Slide sebelumnya")}
             >
               <ArrowLeft className="h-3.5 w-3.5" />
             </Button>
@@ -578,7 +581,7 @@ function EditorCarousel({ comics }: { comics: ComicCardType[] }) {
               variant="outline"
               size="icon-sm"
               onClick={() => move(1)}
-              aria-label="Slide berikutnya"
+              aria-label={t("Slide berikutnya")}
             >
               <ArrowRight className="h-3.5 w-3.5" />
             </Button>

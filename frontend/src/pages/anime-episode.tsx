@@ -20,12 +20,14 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useApiQuery } from "@/hooks/use-api-query"
 import { api, getErrorMessage } from "@/lib/api"
+import { useI18n } from "@/lib/i18n"
 import type { AnimeEpisode } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 export function AnimeEpisodePage() {
   const { episodeId = "" } = useParams()
   const navigate = useNavigate()
+  const { t } = useI18n()
   const { data, loading, error } = useApiQuery<AnimeEpisode>(
     `/anime/episode/${encodeURIComponent(episodeId)}/`,
   )
@@ -49,10 +51,10 @@ export function AnimeEpisodePage() {
       if (response.data.url) {
         setStreamUrl(response.data.url)
         setActiveServer(serverId)
-        toast.success(`Server ${serverName} aktif`)
+        toast.success(t("Server {name} aktif", { name: serverName }))
       }
     } catch (requestError) {
-      toast.error("Server gak bisa dibuka", { description: getErrorMessage(requestError) })
+      toast.error(t("Server gak bisa dibuka"), { description: getErrorMessage(requestError) })
     } finally {
       setServerLoading("")
     }
@@ -65,9 +67,9 @@ export function AnimeEpisodePage() {
       <div className="container py-16">
         <EmptyState
           icon={MonitorPlay}
-          title="Episode gak bisa dibuka"
-          description={error ?? "Episode ini belum tersedia."}
-          actionLabel="Balik ke anime"
+          title={t("Episode gak bisa dibuka")}
+          description={error ?? t("Episode ini belum tersedia.")}
+          actionLabel={t("Balik ke anime")}
           actionHref="/anime"
         />
       </div>
@@ -88,29 +90,31 @@ export function AnimeEpisodePage() {
                 to={`/anime/${encodeURIComponent(data.anime_id)}`}
                 className="transition hover:text-foreground"
               >
-                Detail anime
+                {t("Detail anime")}
               </Link>
               <span>/</span>
             </>
           ) : null}
-          <span className="line-clamp-1 text-foreground">Nonton</span>
+          <span className="line-clamp-1 text-foreground">{t("Nonton")}</span>
         </div>
 
         <div className="mt-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
           <div>
-            <h1 className="headline text-2xl text-balance sm:text-3xl">{data.title || "Episode"}</h1>
+            <h1 className="headline text-2xl text-balance sm:text-3xl">
+              {data.title || t("Episode")}
+            </h1>
             <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
               {data.release_time ? <span>{data.release_time}</span> : null}
               <Badge variant="outline" className="gap-1">
                 <MonitorPlay className="h-3 w-3" />
-                Embed player
+                {t("Embed player")}
               </Badge>
             </div>
           </div>
           <Button asChild variant="outline" size="sm">
             <Link to={data.anime_id ? `/anime/${encodeURIComponent(data.anime_id)}` : "/anime"}>
               <ArrowLeft className="h-3.5 w-3.5" />
-              Daftar episode
+              {t("Daftar episode")}
             </Link>
           </Button>
         </div>
@@ -130,7 +134,7 @@ export function AnimeEpisodePage() {
             ) : (
               <div className="flex h-full flex-col items-center justify-center gap-3 text-zinc-400">
                 <MonitorPlay className="h-8 w-8" />
-                <p className="text-sm">Player belum tersedia.</p>
+                <p className="text-sm">{t("Player belum tersedia.")}</p>
               </div>
             )}
           </div>
@@ -147,7 +151,7 @@ export function AnimeEpisodePage() {
               }}
             >
               <ChevronLeft className="h-3.5 w-3.5" />
-              Sebelumnya
+              {t("Sebelumnya")}
             </Button>
             <Button
               size="sm"
@@ -156,7 +160,7 @@ export function AnimeEpisodePage() {
                 if (data.next?.episodeId) navigate(`/anime/episode/${data.next.episodeId}`)
               }}
             >
-              Selanjutnya
+              {t("Selanjutnya")}
               <ChevronRight className="h-3.5 w-3.5" />
             </Button>
           </div>
@@ -164,7 +168,7 @@ export function AnimeEpisodePage() {
             <Button asChild variant="ghost" size="sm">
               <a href={streamUrl} target="_blank" rel="noreferrer">
                 <ExternalLink className="h-3.5 w-3.5" />
-                Buka player di tab baru
+                {t("Buka player di tab baru")}
               </a>
             </Button>
           ) : null}
@@ -174,15 +178,15 @@ export function AnimeEpisodePage() {
           <section className="rounded-[5px] border border-border/60 bg-card p-5">
             <div className="flex items-center gap-2">
               <Server className="h-4 w-4 text-primary" />
-              <h2 className="headline text-lg">Pilih server</h2>
+              <h2 className="headline text-lg">{t("Pilih server")}</h2>
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              Kalau player utama gak jalan, coba server lain di bawah.
+              {t("Kalau player utama gak jalan, coba server lain di bawah.")}
             </p>
 
             <div className="mt-4 space-y-4">
               {data.streams.length === 0 ? (
-                <p className="text-xs text-muted-foreground">Server streaming gak tersedia.</p>
+                <p className="text-xs text-muted-foreground">{t("Server streaming gak tersedia.")}</p>
               ) : (
                 data.streams.map((quality) => (
                   <div key={quality.title}>
@@ -216,22 +220,22 @@ export function AnimeEpisodePage() {
 
             <div className="mt-5 flex items-start gap-2 rounded-[5px] bg-amber-500/10 p-3 text-[11px] leading-relaxed text-amber-700 dark:text-amber-400">
               <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-              Kalau iframe diblokir server sumber, pakai tombol “Buka player di tab baru”.
+              {t("Kalau iframe diblokir server sumber, pakai tombol “Buka player di tab baru”.")}
             </div>
           </section>
 
           <aside className="rounded-[5px] border border-border/60 bg-card p-5">
             <div className="flex items-center gap-2">
               <Download className="h-4 w-4 text-primary" />
-              <h2 className="headline text-lg">Download</h2>
+              <h2 className="headline text-lg">{t("Download")}</h2>
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              Link download dari sumber. Ukuran bisa berubah.
+              {t("Link download dari sumber. Ukuran bisa berubah.")}
             </p>
 
             <div className="mt-4 space-y-3">
               {data.downloads.length === 0 ? (
-                <p className="text-xs text-muted-foreground">Link download gak tersedia.</p>
+                <p className="text-xs text-muted-foreground">{t("Link download gak tersedia.")}</p>
               ) : (
                 data.downloads.map((quality) => (
                   <div key={quality.title} className="rounded-[5px] border border-border/60 p-3">

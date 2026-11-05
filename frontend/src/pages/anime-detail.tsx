@@ -19,10 +19,12 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useApiQuery } from "@/hooks/use-api-query"
+import { useI18n } from "@/lib/i18n"
 import type { AnimeDetail } from "@/lib/types"
 
 export function AnimeDetailPage() {
   const { animeId = "" } = useParams()
+  const { t } = useI18n()
   const { data, loading, error } = useApiQuery<AnimeDetail>(
     `/anime/${encodeURIComponent(animeId)}/`,
   )
@@ -35,9 +37,9 @@ export function AnimeDetailPage() {
       <div className="container py-16">
         <EmptyState
           icon={Clapperboard}
-          title="Anime gak ketemu"
-          description={error ?? "Data anime ini belum tersedia di sumber."}
-          actionLabel="Balik ke anime"
+          title={t("Anime gak ketemu")}
+          description={error ?? t("Data anime ini belum tersedia di sumber.")}
+          actionLabel={t("Balik ke anime")}
           actionHref="/anime"
         />
       </div>
@@ -113,7 +115,7 @@ export function AnimeDetailPage() {
                 ) : null}
                 <span className="inline-flex items-center gap-1.5">
                   <Tv className="h-3.5 w-3.5" />
-                  {data.episodes.length} episode
+                  {t("{count} episode tersedia", { count: data.episodes.length })}
                 </span>
                 {data.studios ? (
                   <span className="inline-flex items-center gap-1.5">
@@ -138,7 +140,7 @@ export function AnimeDetailPage() {
                 <p
                   className={cnSynopsis(!expanded)}
                 >
-                  {data.synopsis || "Belum ada sinopsis untuk anime ini."}
+                  {data.synopsis || t("Belum ada sinopsis untuk anime ini.")}
                 </p>
                 {(data.synopsis ?? "").length > 280 ? (
                   <button
@@ -146,7 +148,7 @@ export function AnimeDetailPage() {
                     onClick={() => setExpanded((value) => !value)}
                     className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline"
                   >
-                    {expanded ? "Sembunyikan" : "Baca selengkapnya"}
+                    {expanded ? t("Sembunyikan") : t("Baca selengkapnya")}
                     {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
                   </button>
                 ) : null}
@@ -157,13 +159,15 @@ export function AnimeDetailPage() {
                   <Button asChild size="lg">
                     <Link to={`/anime/episode/${encodeURIComponent(data.episodes[0].id)}`}>
                       <Play className="h-4 w-4 fill-current" />
-                      Tonton episode {data.episodes[0].eps ?? "terbaru"}
+                      {t("Tonton episode {episode}", {
+                        episode: data.episodes[0].eps ?? t("terbaru"),
+                      })}
                     </Link>
                   </Button>
                   <Button asChild size="lg" variant="outline">
                     <Link to="/anime">
                       <ArrowLeft className="h-4 w-4" />
-                      Daftar anime
+                      {t("Daftar anime")}
                     </Link>
                   </Button>
                 </div>
@@ -177,9 +181,9 @@ export function AnimeDetailPage() {
             <div className="rounded-[5px] border border-border/60 bg-card p-4 sm:p-5">
               <div className="flex items-center justify-between border-b border-border/60 pb-4">
                 <div>
-                  <h2 className="headline text-xl">Daftar episode</h2>
+                  <h2 className="headline text-xl">{t("Daftar episode")}</h2>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    {data.episodes.length} episode tersedia
+                    {t("{count} episode tersedia", { count: data.episodes.length })}
                   </p>
                 </div>
                 <Badge variant="outline">
@@ -191,8 +195,8 @@ export function AnimeDetailPage() {
               {data.episodes.length === 0 ? (
                 <div className="flex flex-col items-center gap-2 py-12 text-center">
                   <Clapperboard className="h-6 w-6 text-muted-foreground" />
-                  <p className="text-sm font-semibold">Belum ada episode</p>
-                  <p className="text-xs text-muted-foreground">Coba cek lagi nanti.</p>
+                  <p className="text-sm font-semibold">{t("Belum ada episode")}</p>
+                  <p className="text-xs text-muted-foreground">{t("Coba cek lagi nanti.")}</p>
                 </div>
               ) : (
                 <div className="mt-2 divide-y divide-border/60">
@@ -207,7 +211,7 @@ export function AnimeDetailPage() {
                       </span>
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-[13px] font-semibold group-hover:text-primary">
-                          {episode.title || `Episode ${episode.eps}`}
+                          {episode.title || t("Episode {episode}", { episode: episode.eps ?? "" })}
                         </p>
                         {episode.date ? (
                           <p className="mt-0.5 text-[10px] text-muted-foreground">{episode.date}</p>
@@ -223,21 +227,20 @@ export function AnimeDetailPage() {
 
           <aside className="space-y-4">
             <div className="rounded-[5px] border border-border/60 bg-card p-5">
-              <h3 className="headline text-lg">Informasi</h3>
+              <h3 className="headline text-lg">{t("Informasi")}</h3>
               <dl className="mt-4 space-y-3 text-sm">
-                <InfoRow label="Judul Jepang" value={data.japanese || "—"} />
-                <InfoRow label="Studio" value={data.studios || "—"} />
-                <InfoRow label="Produser" value={data.producers || "—"} />
-                <InfoRow label="Tipe" value={data.type || "—"} />
-                <InfoRow label="Status" value={data.status || "—"} />
-                <InfoRow label="Tayang" value={data.aired || "—"} />
+                <InfoRow label={t("Judul Jepang")} value={data.japanese || "—"} />
+                <InfoRow label={t("Studio")} value={data.studios || "—"} />
+                <InfoRow label={t("Produser")} value={data.producers || "—"} />
+                <InfoRow label={t("Tipe")} value={data.type || "—"} />
+                <InfoRow label={t("Status")} value={data.status || "—"} />
+                <InfoRow label={t("Tayang")} value={data.aired || "—"} />
               </dl>
             </div>
             <div className="rounded-[5px] border border-dashed border-border bg-card/50 p-5">
-              <p className="text-sm font-bold">Catatan</p>
+              <p className="text-sm font-bold">{t("Catatan")}</p>
               <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
-                Video di-embed dari server sumber. Kalau player gak muncul, buka server alternatif
-                di halaman episode.
+                {t("Video di-embed dari server sumber. Kalau player gak muncul, buka server alternatif di halaman episode.")}
               </p>
             </div>
           </aside>

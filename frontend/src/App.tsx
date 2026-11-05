@@ -6,6 +6,8 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { LibraryProvider } from "@/hooks/use-library"
+import { AuthProvider } from "@/lib/auth"
+import { I18nProvider } from "@/lib/i18n"
 import { AnimePage } from "@/pages/anime"
 import { AnimeDetailPage } from "@/pages/anime-detail"
 import { AnimeEpisodePage } from "@/pages/anime-episode"
@@ -14,8 +16,10 @@ import { DashboardPage } from "@/pages/dashboard"
 import { ExplorePage } from "@/pages/explore"
 import { HomePage } from "@/pages/home"
 import { LibraryPage } from "@/pages/library"
+import { LoginPage } from "@/pages/login"
 import { NotFoundPage } from "@/pages/not-found"
 import { ReaderPage } from "@/pages/reader"
+import { RegisterPage } from "@/pages/register"
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -32,28 +36,34 @@ function ScrollToTop() {
 export default function App() {
   return (
     <ThemeProvider>
-      <LibraryProvider>
-        <TooltipProvider delayDuration={200}>
-          <BrowserRouter>
-            <ScrollToTop />
-            <AppShell>
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/jelajah" element={<ExplorePage />} />
-                <Route path="/komik/:slug" element={<ComicDetailPage />} />
-                <Route path="/baca/:slug/:chapterSlug" element={<ReaderPage />} />
-                <Route path="/koleksi" element={<LibraryPage />} />
-                <Route path="/dashboard" element={<DashboardPage />} />
-                <Route path="/anime" element={<AnimePage />} />
-                <Route path="/anime/episode/:episodeId" element={<AnimeEpisodePage />} />
-                <Route path="/anime/:animeId" element={<AnimeDetailPage />} />
-                <Route path="*" element={<NotFoundPage />} />
-              </Routes>
-            </AppShell>
-            <Toaster />
-          </BrowserRouter>
-        </TooltipProvider>
-      </LibraryProvider>
+      <I18nProvider>
+        <AuthProvider>
+          <LibraryProvider>
+            <TooltipProvider delayDuration={200}>
+              <BrowserRouter>
+                <ScrollToTop />
+                <AppShell>
+                  <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/jelajah" element={<ExplorePage />} />
+                    <Route path="/komik/:slug" element={<ComicDetailPage />} />
+                    <Route path="/baca/:slug/:chapterSlug" element={<ReaderPage />} />
+                    <Route path="/koleksi" element={<LibraryPage />} />
+                    <Route path="/dashboard" element={<DashboardPage />} />
+                    <Route path="/masuk" element={<LoginPage />} />
+                    <Route path="/daftar" element={<RegisterPage />} />
+                    <Route path="/anime" element={<AnimePage />} />
+                    <Route path="/anime/episode/:episodeId" element={<AnimeEpisodePage />} />
+                    <Route path="/anime/:animeId" element={<AnimeDetailPage />} />
+                    <Route path="*" element={<NotFoundPage />} />
+                  </Routes>
+                </AppShell>
+                <Toaster />
+              </BrowserRouter>
+            </TooltipProvider>
+          </LibraryProvider>
+        </AuthProvider>
+      </I18nProvider>
     </ThemeProvider>
   )
 }

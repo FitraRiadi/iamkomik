@@ -23,18 +23,20 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useLibrary } from "@/hooks/use-library"
 import { formatRelative } from "@/lib/format"
+import { useI18n } from "@/lib/i18n"
 import { getReaderId } from "@/lib/reader"
 import { cn } from "@/lib/utils"
 
 export function LibraryPage() {
   const { favorites, history, loading, removeHistory } = useLibrary()
+  const { t, language } = useI18n()
 
   const copyId = async () => {
     try {
       await navigator.clipboard.writeText(getReaderId())
-      toast.success("ID perangkat disalin")
+      toast.success(t("ID perangkat disalin"))
     } catch {
-      toast.error("Gagal menyalin ID")
+      toast.error(t("Gagal menyalin ID"))
     }
   }
 
@@ -47,27 +49,26 @@ export function LibraryPage() {
           <div className="absolute -right-8 -top-12 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
           <div className="relative flex flex-col justify-between gap-6 md:flex-row md:items-end">
             <div>
-              <p className="eyebrow">Koleksi pribadi</p>
+              <p className="eyebrow">{t("Koleksi pribadi")}</p>
               <h1 className="headline mt-2 text-4xl text-balance sm:text-5xl">
-                Bacaan lo, rapi di sini.
+                {t("Bacaan lo, rapi di sini.")}
               </h1>
               <p className="mt-2 max-w-lg text-sm leading-relaxed text-muted-foreground">
-                Semua komik yang lo simpan dan riwayat baca tersimpan otomatis di perangkat ini.
-                Gak perlu bikin akun.
+                {t("Semua komik yang lo simpan dan riwayat baca tersimpan otomatis di perangkat ini. Gak perlu bikin akun.")}
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="soft" className="gap-1.5 px-3 py-1.5">
                 <Bookmark className="h-3 w-3" />
-                {favorites.length} favorit
+                {t("{count} favorit", { count: favorites.length })}
               </Badge>
               <Badge variant="outline" className="gap-1.5 bg-background/60 px-3 py-1.5">
                 <History className="h-3 w-3" />
-                {history.length} riwayat
+                {t("{count} riwayat", { count: history.length })}
               </Badge>
               <Button variant="outline" size="sm" onClick={() => void copyId()}>
                 <Copy className="h-3.5 w-3.5" />
-                Salin ID
+                {t("Salin ID")}
               </Button>
             </div>
           </div>
@@ -78,14 +79,14 @@ export function LibraryPage() {
             <TabsList>
               <TabsTrigger value="favorites">
                 <Bookmark className="h-3.5 w-3.5" />
-                Favorit
+                {t("Favorit")}
                 <span className="rounded-full bg-background/70 px-1.5 py-0.5 text-[10px] font-bold">
                   {favorites.length}
                 </span>
               </TabsTrigger>
               <TabsTrigger value="history">
                 <Clock3 className="h-3.5 w-3.5" />
-                Riwayat baca
+                {t("Riwayat baca")}
                 <span className="rounded-full bg-background/70 px-1.5 py-0.5 text-[10px] font-bold">
                   {history.length}
                 </span>
@@ -94,7 +95,7 @@ export function LibraryPage() {
 
             <Button asChild variant="ghost" size="sm">
               <Link to="/jelajah">
-                Cari komik lagi
+                {t("Cari komik lagi")}
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </Button>
@@ -106,9 +107,9 @@ export function LibraryPage() {
             ) : favorites.length === 0 ? (
               <EmptyState
                 icon={Bookmark}
-                title="Belum ada komik yang disimpan"
-                description="Tekan tombol Simpan di card komik mana pun, nanti muncul di sini."
-                actionLabel="Mulai jelajah"
+                title={t("Belum ada komik yang disimpan")}
+                description={t("Tekan tombol Simpan di card komik mana pun, nanti muncul di sini.")}
+                actionLabel={t("Mulai jelajah")}
                 actionHref="/jelajah"
               />
             ) : (
@@ -124,9 +125,9 @@ export function LibraryPage() {
                       chapter: "",
                       type: favorite.comic_type,
                       genre: favorite.genre,
-                      meta: formatRelative(favorite.created_at),
+                      meta: formatRelative(favorite.created_at, language),
                     }}
-                    chapterLabel="Tersimpan"
+                    chapterLabel={t("Tersimpan")}
                   />
                 ))}
               </MasonryGrid>
@@ -139,9 +140,9 @@ export function LibraryPage() {
             ) : history.length === 0 ? (
               <EmptyState
                 icon={BookOpen}
-                title="Belum ada riwayat baca"
-                description="Buka chapter pertama dari komik favorit lo, riwayatnya bakal otomatis muncul di sini."
-                actionLabel="Cari komik"
+                title={t("Belum ada riwayat baca")}
+                description={t("Buka chapter pertama dari komik favorit lo, riwayatnya bakal otomatis muncul di sini.")}
+                actionLabel={t("Cari komik")}
                 actionHref="/jelajah"
               />
             ) : (
@@ -178,10 +179,10 @@ export function LibraryPage() {
                             variant="glass"
                             className="absolute bottom-2.5 left-2.5 border-white/15 text-[10px]"
                           >
-                            {item.chapter_name || "Chapter"}
+                            {item.chapter_name || t("Chapter")}
                           </Badge>
                           <span className="absolute bottom-2.5 right-2.5 inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-[10px] font-bold text-primary-foreground opacity-0 transition group-hover:opacity-100">
-                            Lanjut
+                            {t("Lanjut")}
                             <ArrowRight className="h-3 w-3" />
                           </span>
                         </div>
@@ -190,7 +191,7 @@ export function LibraryPage() {
                             {item.title}
                           </h3>
                           <p className="text-[10.5px] text-muted-foreground">
-                            Dibaca {formatRelative(item.updated_at)}
+                            {t("Dibaca {time}", { time: formatRelative(item.updated_at, language) })}
                           </p>
                         </div>
                       </Link>
@@ -198,7 +199,7 @@ export function LibraryPage() {
                         type="button"
                         onClick={() => void removeHistory(item.comic_slug)}
                         className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-black/50 text-white opacity-0 backdrop-blur transition hover:bg-destructive group-hover:opacity-100"
-                        aria-label="Hapus riwayat"
+                        aria-label={t("Hapus riwayat")}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
@@ -216,20 +217,20 @@ export function LibraryPage() {
               <Sparkles className="h-5 w-5" />
             </span>
             <div>
-              <p className="text-sm font-bold">Data lo aman di perangkat ini</p>
+              <p className="text-sm font-bold">{t("Data lo aman di perangkat ini")}</p>
               <p className="text-xs text-muted-foreground">
-                Simpan ID perangkat buat mindahin koleksi ke browser lain.
+                {t("Simpan ID perangkat buat mindahin koleksi ke browser lain.")}
               </p>
             </div>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => void copyId()}>
               <Copy className="h-3.5 w-3.5" />
-              Salin ID
+              {t("Salin ID")}
             </Button>
             <Button asChild size="sm">
               <Link to="/dashboard">
-                Lihat statistik
+                {t("Lihat statistik")}
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </Button>

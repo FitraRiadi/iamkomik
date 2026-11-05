@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom"
 import { Bookmark, ChartNoAxesColumn, Clapperboard, Compass, Home } from "lucide-react"
 
+import { useI18n } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
 
 const items = [
@@ -12,9 +13,11 @@ const items = [
 ]
 
 export function MobileNav() {
+  const { t } = useI18n()
+
   return (
     <nav
-      aria-label="Navigasi utama"
+      aria-label={t("Navigasi utama")}
       className="fixed inset-x-0 bottom-0 z-40 px-2.5 pb-[calc(0.5rem+env(safe-area-inset-bottom))] md:hidden"
     >
       <div className="mx-auto flex max-w-md items-stretch gap-0.5 rounded-[1.75rem] border border-border/70 bg-background/90 p-1.5 shadow-[0_20px_55px_-22px_rgba(15,15,20,0.55)] backdrop-blur-2xl">
@@ -23,8 +26,8 @@ export function MobileNav() {
             key={item.to}
             to={item.to}
             end={item.end}
-            aria-label={item.label}
-            title={item.label}
+            aria-label={t(item.label)}
+            title={t(item.label)}
             className={({ isActive }) =>
               cn(
                 "group flex min-w-0 flex-1 items-center justify-center px-0.5 py-1 text-muted-foreground transition-colors",

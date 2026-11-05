@@ -2,6 +2,8 @@ import * as React from "react"
 import { toast } from "sonner"
 
 import { api, getErrorMessage } from "@/lib/api"
+import { useAuth } from "@/lib/auth"
+import { useI18n } from "@/lib/i18n"
 import type { ComicCard, Favorite, HistoryItem, LibraryPayload } from "@/lib/types"
 
 interface ToggleInput {
@@ -28,6 +30,8 @@ interface LibraryContextValue {
 const LibraryContext = React.createContext<LibraryContextValue | undefined>(undefined)
 
 export function LibraryProvider({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth()
+  const { t } = useI18n()
   const [favorites, setFavorites] = React.useState<Favorite[]>([])
   const [history, setHistory] = React.useState<HistoryItem[]>([])
   const [loading, setLoading] = React.useState(true)
@@ -45,8 +49,9 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   React.useEffect(() => {
+    setLoading(true)
     void refresh()
-  }, [refresh])
+  }, [refresh, user?.id])
 
   const savedSlugs = React.useMemo(
     () => new Set(favorites.map((favorite) => favorite.comic_slug)),
@@ -85,11 +90,11 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
           genre: comic.genre ?? "",
         })
         if (response.data.saved) {
-          toast.success("Disimpan ke koleksi", {
+          toast.success(t("Disimpan ke koleksi"), {
             description: comic.title,
           })
         } else {
-          toast("Dihapus dari koleksi", { description: comic.title })
+          toast(t("Dihapus dari koleksi"), { description: comic.title })
         }
       } catch (error) {
         setFavorites((current) =>
@@ -97,10 +102,10 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
             ? [optimistic, ...current.filter((item) => item.comic_slug !== comic.slug)]
             : current.filter((item) => item.comic_slug !== comic.slug),
         )
-        toast.error("Gagal update koleksi", { description: getErrorMessage(error) })
+        toast.error(t("Gagal update koleksi"), { description: getErrorMessage(error) })
       }
     },
-    [savedSlugs],
+    [savedSlugs, t],
   )
 
   const removeFavorite = React.useCallback(async (slug: string) => {
@@ -108,24 +113,24 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
     setFavorites((current) => current.filter((item) => item.comic_slug !== slug))
     try {
       await api.delete(`/favorites/${encodeURIComponent(slug)}/`)
-      toast("Dihapus dari koleksi")
+      toast(t("Dihapus dari koleksi"))
     } catch (error) {
       setFavorites(snapshot)
-      toast.error("Gagal menghapus", { description: getErrorMessage(error) })
+      toast.error(t("Gagal menghapus"), { description: getErrorMessage(error) })
     }
-  }, [favorites])
+  }, [favorites, t])
 
   const removeHistory = React.useCallback(async (slug: string) => {
     const snapshot = history
     setHistory((current) => current.filter((item) => item.comic_slug !== slug))
     try {
       await api.delete(`/history/${encodeURIComponent(slug)}/`)
-      toast("Riwayat dihapus")
+      toast(t("Riwayat dihapus"))
     } catch (error) {
       setHistory(snapshot)
-      toast.error("Gagal menghapus riwayat", { description: getErrorMessage(error) })
+      toast.error(t("Gagal menghapus riwayat"), { description: getErrorMessage(error) })
     }
-  }, [history])
+  }, [history, t])
 
   const value = React.useMemo<LibraryContextValue>(
     () => ({

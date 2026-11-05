@@ -5,6 +5,7 @@ import { BookOpen, Layers } from "lucide-react"
 
 import { SaveButton } from "@/components/save-button"
 import { Badge } from "@/components/ui/badge"
+import { useI18n } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
 import type { ComicCard as ComicCardType } from "@/lib/types"
 
@@ -32,6 +33,7 @@ export function ComicCard({
   showSave = true,
   chapterLabel,
 }: ComicCardProps) {
+  const { t } = useI18n()
   const ratio = ratios[index % ratios.length]
   const [imageFailed, setImageFailed] = React.useState(false)
 
@@ -110,7 +112,7 @@ export function ComicCard({
             {comic.genre ? (
               <span className="line-clamp-1">{comic.genre.split(",")[0]}</span>
             ) : (
-              <span>Komik</span>
+              <span>{t("Komik")}</span>
             )}
             {comic.meta ? (
               <>

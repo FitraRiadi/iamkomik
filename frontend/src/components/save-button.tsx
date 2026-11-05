@@ -1,6 +1,7 @@
 import { Bookmark, BookmarkCheck } from "lucide-react"
 
 import { useLibrary } from "@/hooks/use-library"
+import { useI18n } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
 import type { ComicCard } from "@/lib/types"
 
@@ -12,12 +13,13 @@ interface SaveButtonProps {
 
 export function SaveButton({ comic, className, compact = false }: SaveButtonProps) {
   const { isSaved, toggleFavorite } = useLibrary()
+  const { t } = useI18n()
   const saved = isSaved(comic.slug)
 
   return (
     <button
       type="button"
-      aria-label={saved ? "Hapus dari koleksi" : "Simpan ke koleksi"}
+      aria-label={saved ? t("Hapus dari koleksi") : t("Simpan ke koleksi")}
       onClick={(event) => {
         event.preventDefault()
         event.stopPropagation()
@@ -45,7 +47,7 @@ export function SaveButton({ comic, className, compact = false }: SaveButtonProp
       ) : (
         <Bookmark className="h-4 w-4" />
       )}
-      {!compact && <span>{saved ? "Tersimpan" : "Simpan"}</span>}
+      {!compact && <span>{saved ? t("Tersimpan") : t("Simpan")}</span>}
     </button>
   )
 }

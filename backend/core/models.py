@@ -1,10 +1,18 @@
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
 
 class Reader(models.Model):
-    """Identitas anonim per perangkat. Dibuat otomatis dari header X-Reader-Id."""
+    """Identitas baca. Bisa anonim per perangkat atau terhubung ke akun."""
 
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="reader",
+    )
     token = models.CharField(max_length=64, unique=True)
     display_name = models.CharField(max_length=80, blank=True, default="")
     created_at = models.DateTimeField(auto_now_add=True)

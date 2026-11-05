@@ -31,11 +31,13 @@ import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useApiQuery } from "@/hooks/use-api-query"
 import { useLibrary } from "@/hooks/use-library"
+import { useI18n } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
 import type { ComicDetail } from "@/lib/types"
 
 export function ComicDetailPage() {
   const { slug = "" } = useParams()
+  const { t } = useI18n()
   const { data, loading, error } = useApiQuery<ComicDetail>(
     `/comics/${encodeURIComponent(slug)}/`,
   )
@@ -67,9 +69,9 @@ export function ComicDetailPage() {
       <div className="container py-16">
         <EmptyState
           icon={BookOpen}
-          title="Komik gak ketemu"
-          description={error ?? "Data komik ini belum tersedia di sumbernya. Coba judul lain aja."}
-          actionLabel="Balik ke jelajah"
+          title={t("Komik gak ketemu")}
+          description={error ?? t("Data komik ini belum tersedia di sumbernya. Coba judul lain aja.")}
+          actionLabel={t("Balik ke jelajah")}
           actionHref="/jelajah"
         />
       </div>
@@ -83,11 +85,11 @@ export function ComicDetailPage() {
         <div className="container">
         <div className="flex items-center gap-2 py-5 text-xs font-medium text-muted-foreground">
           <Link to="/" className="transition hover:text-foreground">
-            Beranda
+            {t("Beranda")}
           </Link>
           <span>/</span>
           <Link to="/jelajah" className="transition hover:text-foreground">
-            Jelajah
+            {t("Jelajah")}
           </Link>
           <span>/</span>
           <span className="line-clamp-1 text-foreground">{data.title}</span>
@@ -127,7 +129,7 @@ export function ComicDetailPage() {
               </div>
               <div className="mt-3 hidden items-center justify-center gap-1.5 text-[11px] font-semibold text-muted-foreground md:flex">
                 <Sparkles className="h-3.5 w-3.5 text-primary" />
-                {data.total_chapters} chapter tersedia
+                {t("{count} chapter tersedia", { count: data.total_chapters })}
               </div>
             </motion.div>
 
@@ -153,12 +155,12 @@ export function ComicDetailPage() {
               <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium text-muted-foreground">
                 <span className="inline-flex items-center gap-1.5">
                   <Layers className="h-3.5 w-3.5" />
-                  {data.total_chapters} chapter
+                  {t("{count} chapter", { count: data.total_chapters })}
                 </span>
                 {data.latest_chapter ? (
                   <span className="inline-flex items-center gap-1.5">
                     <Clock3 className="h-3.5 w-3.5" />
-                    Update {data.latest_chapter.date || data.latest_chapter.name}
+                    {t("Update {date}", { date: data.latest_chapter.date || data.latest_chapter.name })}
                   </span>
                 ) : null}
                 {data.author ? (
@@ -188,7 +190,7 @@ export function ComicDetailPage() {
                     !expanded && "line-clamp-4",
                   )}
                 >
-                  {data.synopsis || "Belum ada sinopsis untuk komik ini."}
+                  {data.synopsis || t("Belum ada sinopsis untuk komik ini.")}
                 </p>
                 {(data.synopsis ?? "").length > 260 ? (
                   <button
@@ -196,7 +198,7 @@ export function ComicDetailPage() {
                     onClick={() => setExpanded((value) => !value)}
                     className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline"
                   >
-                    {expanded ? "Sembunyikan" : "Baca selengkapnya"}
+                    {expanded ? t("Sembunyikan") : t("Baca selengkapnya")}
                     {expanded ? (
                       <ChevronUp className="h-3.5 w-3.5" />
                     ) : (
@@ -211,7 +213,9 @@ export function ComicDetailPage() {
                   <Button asChild size="lg">
                     <Link to={`/baca/${encodeURIComponent(data.slug)}/${encodeURIComponent(readTarget)}`}>
                       <Play className="h-4 w-4" />
-                      {progress ? `Lanjut ${progress.chapter_name}` : "Mulai baca"}
+                      {progress
+                        ? t("Lanjut {chapter}", { chapter: progress.chapter_name })
+                        : t("Mulai baca")}
                     </Link>
                   </Button>
                 ) : null}
@@ -235,9 +239,9 @@ export function ComicDetailPage() {
             <div className="rounded-[5px] border border-border/60 bg-card p-4 sm:p-5">
               <div className="flex flex-col gap-3 border-b border-border/60 pb-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h2 className="headline text-xl">Daftar chapter</h2>
+                  <h2 className="headline text-xl">{t("Daftar chapter")}</h2>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    {data.chapters.length} chapter · Klik buat mulai baca
+                    {t("{count} chapter · Klik buat mulai baca", { count: data.chapters.length })}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -246,7 +250,7 @@ export function ComicDetailPage() {
                     <Input
                       value={chapterQuery}
                       onChange={(event) => setChapterQuery(event.target.value)}
-                      placeholder="Cari chapter…"
+                      placeholder={t("Cari chapter…")}
                       className="h-9 rounded-full pl-9 text-xs"
                     />
                   </div>
@@ -254,8 +258,8 @@ export function ComicDetailPage() {
                     variant="outline"
                     size="icon-sm"
                     onClick={() => setDescending((value) => !value)}
-                    aria-label="Urutkan chapter"
-                    title={descending ? "Terbaru dulu" : "Terlama dulu"}
+                    aria-label={t("Urutkan chapter")}
+                    title={descending ? t("Terbaru dulu") : t("Terlama dulu")}
                   >
                     <ArrowUpDown className="h-3.5 w-3.5" />
                   </Button>
@@ -265,8 +269,8 @@ export function ComicDetailPage() {
               {visibleChapters.length === 0 ? (
                 <div className="flex flex-col items-center gap-2 py-12 text-center">
                   <ListFilter className="h-6 w-6 text-muted-foreground" />
-                  <p className="text-sm font-semibold">Chapter gak ketemu</p>
-                  <p className="text-xs text-muted-foreground">Coba kata kunci lain.</p>
+                  <p className="text-sm font-semibold">{t("Chapter gak ketemu")}</p>
+                  <p className="text-xs text-muted-foreground">{t("Coba kata kunci lain.")}</p>
                 </div>
               ) : (
                 <div className="mt-2 divide-y divide-border/60">
@@ -300,7 +304,9 @@ export function ComicDetailPage() {
                   onClick={() => setShowAll((value) => !value)}
                   className="mt-3 w-full"
                 >
-                  {showAll ? "Tampilkan lebih sedikit" : `Tampilkan semua (${chapters.length})`}
+                  {showAll
+                    ? t("Tampilkan lebih sedikit")
+                    : t("Tampilkan semua ({count})", { count: chapters.length })}
                 </Button>
               ) : null}
             </div>
@@ -308,30 +314,38 @@ export function ComicDetailPage() {
 
           <aside className="order-1 space-y-4 lg:order-2">
             <div className="rounded-[5px] border border-border/60 bg-card p-5">
-              <h3 className="headline text-lg">Info komik</h3>
+              <h3 className="headline text-lg">{t("Info komik")}</h3>
               <dl className="mt-4 space-y-3 text-sm">
-                <InfoRow icon={Layers} label="Tipe" value={data.type || "—"} />
-                <InfoRow icon={BookOpen} label="Total chapter" value={String(data.total_chapters)} />
-                <InfoRow icon={CalendarDays} label="Update terakhir" value={data.latest_chapter?.date || "—"} />
-                <InfoRow icon={UserRound} label="Author" value={data.author || "—"} />
-                <InfoRow icon={Sparkles} label="Status" value={data.status || "—"} />
+                <InfoRow icon={Layers} label={t("Tipe")} value={data.type || "—"} />
+                <InfoRow
+                  icon={BookOpen}
+                  label={t("Total chapter")}
+                  value={String(data.total_chapters)}
+                />
+                <InfoRow
+                  icon={CalendarDays}
+                  label={t("Update terakhir")}
+                  value={data.latest_chapter?.date || "—"}
+                />
+                <InfoRow icon={UserRound} label={t("Author")} value={data.author || "—"} />
+                <InfoRow icon={Sparkles} label={t("Status")} value={data.status || "—"} />
               </dl>
             </div>
 
             {progress ? (
               <div className="rounded-[5px] border border-primary/20 bg-accent/60 p-5">
                 <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-accent-foreground">
-                  Terakhir dibaca
+                  {t("Terakhir dibaca")}
                 </p>
                 <p className="mt-2 font-display text-lg font-bold text-foreground">
                   {progress.chapter_name}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Lanjutin dari tempat lo berhenti.
+                  {t("Lanjutin dari tempat lo berhenti.")}
                 </p>
                 <Button asChild size="sm" className="mt-4 w-full">
                   <Link to={`/baca/${encodeURIComponent(data.slug)}/${encodeURIComponent(progress.chapter_slug)}`}>
-                    Lanjut baca
+                    {t("Lanjut baca")}
                     <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
                 </Button>
@@ -339,10 +353,9 @@ export function ComicDetailPage() {
             ) : null}
 
             <div className="rounded-[5px] border border-dashed border-border bg-card/50 p-5">
-              <p className="text-sm font-bold">Tips baca</p>
+              <p className="text-sm font-bold">{t("Tips baca")}</p>
               <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
-                Semua chapter yang lo buka otomatis tersimpan ke riwayat. Gak perlu takut
-                kehilangan posisi baca.
+                {t("Semua chapter yang lo buka otomatis tersimpan ke riwayat. Gak perlu takut kehilangan posisi baca.")}
               </p>
             </div>
           </aside>
@@ -351,9 +364,9 @@ export function ComicDetailPage() {
         {data.similar.length > 0 ? (
           <section className="mt-12">
             <SectionHeading
-              eyebrow="Mirip gini"
-              title="Kalau suka yang ini, coba juga"
-              description="Rekomendasi dari sumber yang sama."
+              eyebrow={t("Mirip gini")}
+              title={t("Kalau suka yang ini, coba juga")}
+              description={t("Rekomendasi dari sumber yang sama.")}
             />
             <MasonryGrid>
               {data.similar.map((comic, index) => (
@@ -367,7 +380,7 @@ export function ComicDetailPage() {
           <Button asChild variant="outline">
             <Link to="/jelajah">
               <ArrowLeft className="h-4 w-4" />
-              Balik ke jelajah
+              {t("Balik ke jelajah")}
             </Link>
           </Button>
         </div>

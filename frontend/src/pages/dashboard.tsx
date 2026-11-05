@@ -33,6 +33,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useApiQuery } from "@/hooks/use-api-query"
 import { useLibrary } from "@/hooks/use-library"
 import { formatMinutes, formatRelative, greeting } from "@/lib/format"
+import { useI18n } from "@/lib/i18n"
 import type { StatsPayload } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
@@ -41,6 +42,7 @@ const chartColors = ["rose", "zinc", "amber", "sky", "violet", "emerald"]
 export function DashboardPage() {
   const { data, loading, error, refetch } = useApiQuery<StatsPayload>("/stats/")
   const { history } = useLibrary()
+  const { t, language } = useI18n()
 
   const totals = data?.totals
   const hasData = Boolean(
@@ -51,19 +53,27 @@ export function DashboardPage() {
   const weekly = (data?.series ?? []).slice(-7).reduce((sum, item) => sum + item.Dibaca, 0)
   const dailyAverage = weekly ? (weekly / 7).toFixed(1) : "0"
   const goal = 10
+  const chartSeries = React.useMemo(
+    () =>
+      (data?.series ?? []).map((item) => ({
+        date: item.date,
+        [t("Dibaca")]: item.Dibaca,
+        [t("Dilihat")]: item.Dilihat,
+      })),
+    [data, t],
+  )
 
   return (
     <PageTransition>
       <div className="container pt-10">
         <section className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
           <div>
-            <p className="eyebrow">Reading insights</p>
+            <p className="eyebrow">{t("Reading insights")}</p>
             <h1 className="headline mt-2 text-4xl text-balance sm:text-5xl">
-              {greeting()}, Fit.
+              {greeting(language)}, Fit.
             </h1>
             <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
-              Ini ringkasan kebiasaan baca lo. Semua dihitung dari aktivitas nyata di perangkat
-              ini — bukan data karangan.
+              {t("Ini ringkasan kebiasaan baca lo. Semua dihitung dari aktivitas nyata di perangkat ini — bukan data karangan.")}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -71,14 +81,14 @@ export function DashboardPage() {
               <Button asChild size="sm">
                 <Link to={`/baca/${encodeURIComponent(lastChapter.comic_slug)}/${encodeURIComponent(lastChapter.chapter_slug)}`}>
                   <BookOpen className="h-3.5 w-3.5" />
-                  Lanjut baca
+                  {t("Lanjut baca")}
                 </Link>
               </Button>
             ) : (
               <Button asChild size="sm">
                 <Link to="/jelajah">
                   <Search className="h-3.5 w-3.5" />
-                  Cari komik
+                  {t("Cari komik")}
                 </Link>
               </Button>
             )}
@@ -91,13 +101,13 @@ export function DashboardPage() {
           <div className="mt-8">
             <EmptyState
               icon={History}
-              title="Statistik belum bisa dimuat"
+              title={t("Statistik belum bisa dimuat")}
               description={error}
-              actionLabel="Coba lagi"
+              actionLabel={t("Coba lagi")}
               actionHref="/dashboard"
             >
               <Button variant="outline" size="sm" className="mt-4" onClick={refetch}>
-                Muat ulang
+                {t("Muat ulang")}
               </Button>
             </EmptyState>
           </div>
@@ -105,9 +115,9 @@ export function DashboardPage() {
           <div className="mt-8">
             <EmptyState
               icon={Sparkles}
-              title="Belum ada jejak bacaan"
-              description="Buka satu chapter komik dulu, statistik, streak, dan genre favorit lo bakal otomatis muncul di sini."
-              actionLabel="Mulai jelajah"
+              title={t("Belum ada jejak bacaan")}
+              description={t("Buka satu chapter komik dulu, statistik, streak, dan genre favorit lo bakal otomatis muncul di sini.")}
+              actionLabel={t("Mulai jelajah")}
               actionHref="/jelajah"
             />
           </div>
@@ -117,32 +127,32 @@ export function DashboardPage() {
               <KpiCard
                 index={0}
                 icon={BookOpen}
-                label="Chapter dibaca"
+                label={t("Chapter dibaca")}
                 value={totals?.chapters_read ?? 0}
-                hint={`${weekly} chapter minggu ini`}
+                hint={t("{count} chapter minggu ini", { count: weekly })}
                 delta={data?.delta_chapters ?? 0}
               />
               <KpiCard
                 index={1}
                 icon={Library}
-                label="Komik dijelajahi"
+                label={t("Komik dijelajahi")}
                 value={totals?.comics_read ?? 0}
-                hint="judul punya riwayat baca"
+                hint={t("judul punya riwayat baca")}
               />
               <KpiCard
                 index={2}
                 icon={Bookmark}
-                label="Komik favorit"
+                label={t("Komik favorit")}
                 value={totals?.favorites ?? 0}
-                hint="disimpan di koleksi"
+                hint={t("disimpan di koleksi")}
               />
               <KpiCard
                 index={3}
                 icon={Flame}
-                label="Streak baca"
+                label={t("Streak baca")}
                 value={totals?.streak_days ?? 0}
-                hint="hari beruntun"
-                suffix="hari"
+                hint={t("hari beruntun")}
+                suffix={t("hari")}
               />
             </div>
 
@@ -150,27 +160,27 @@ export function DashboardPage() {
               <TremorCard className="rounded-[5px] !border-border/70 !ring-border/70 bg-card p-5 lg:col-span-2">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <Title className="font-display text-lg font-bold">Aktivitas 14 hari</Title>
+                    <Title className="font-display text-lg font-bold">{t("Aktivitas 14 hari")}</Title>
                     <Text className="text-xs text-muted-foreground">
-                      Chapter yang dibaca vs komik yang dibuka.
+                      {t("Chapter yang dibaca vs komik yang dibuka.")}
                     </Text>
                   </div>
                   <div className="flex items-center gap-3 text-[11px] font-semibold">
                     <span className="inline-flex items-center gap-1.5">
                       <span className="h-2 w-2 rounded-full bg-rose-500" />
-                      Dibaca
+                      {t("Dibaca")}
                     </span>
                     <span className="inline-flex items-center gap-1.5">
                       <span className="h-2 w-2 rounded-full bg-zinc-400" />
-                      Dilihat
+                      {t("Dilihat")}
                     </span>
                   </div>
                 </div>
                 <AreaChart
                   className="mt-5 h-64 [&_text]:!fill-muted-foreground"
-                  data={data?.series ?? []}
+                  data={chartSeries}
                   index="date"
-                  categories={["Dibaca", "Dilihat"]}
+                  categories={[t("Dibaca"), t("Dilihat")]}
                   colors={["rose", "zinc"]}
                   valueFormatter={(value: number) => `${value}`}
                   showLegend={false}
@@ -182,18 +192,20 @@ export function DashboardPage() {
                 <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-3 text-[11px] text-muted-foreground">
                   <span className="inline-flex items-center gap-1.5">
                     <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
-                    Rata-rata {dailyAverage} chapter/hari
+                    {t("Rata-rata {value} chapter/hari", { value: dailyAverage })}
                   </span>
                   <span className="inline-flex items-center gap-1.5">
                     <Clock3 className="h-3.5 w-3.5" />
-                    Estimasi {formatMinutes(totals?.reading_minutes ?? 0)} membaca
+                    {t("Estimasi {time} membaca", {
+                      time: formatMinutes(totals?.reading_minutes ?? 0, language),
+                    })}
                   </span>
                 </div>
               </TremorCard>
 
               <TremorCard className="rounded-[5px] !border-border/70 !ring-border/70 bg-card p-5">
-                <Title className="font-display text-lg font-bold">Tipe komik</Title>
-                <Text className="text-xs text-muted-foreground">Dari favorit + riwayat baca.</Text>
+                <Title className="font-display text-lg font-bold">{t("Tipe komik")}</Title>
+                <Text className="text-xs text-muted-foreground">{t("Dari favorit + riwayat baca.")}</Text>
                 {data?.types?.length ? (
                   <DonutChart
                     className="mt-4 h-52"
@@ -201,14 +213,14 @@ export function DashboardPage() {
                     category="value"
                     index="name"
                     colors={chartColors}
-                    valueFormatter={(value: number) => `${value} komik`}
+                    valueFormatter={(value: number) => t("{count} komik", { count: value })}
                     showLabel={false}
                     showAnimation
                   />
                 ) : (
                   <div className="mt-8 flex h-40 flex-col items-center justify-center gap-2 text-center">
                     <Library className="h-6 w-6 text-muted-foreground/50" />
-                    <p className="text-xs text-muted-foreground">Tipe komik belum terdeteksi.</p>
+                    <p className="text-xs text-muted-foreground">{t("Tipe komik belum terdeteksi.")}</p>
                   </div>
                 )}
                 <div className="mt-2 flex flex-wrap justify-center gap-x-3 gap-y-1">
@@ -229,9 +241,9 @@ export function DashboardPage() {
 
             <div className="mt-4 grid gap-4 lg:grid-cols-3">
               <TremorCard className="rounded-[5px] !border-border/70 !ring-border/70 bg-card p-5">
-                <Title className="font-display text-lg font-bold">Genre teratas</Title>
+                <Title className="font-display text-lg font-bold">{t("Genre teratas")}</Title>
                 <Text className="text-xs text-muted-foreground">
-                  Genre yang paling sering lo buka.
+                  {t("Genre yang paling sering lo buka.")}
                 </Text>
                 {data?.genres?.length ? (
                   <BarChart
@@ -241,7 +253,7 @@ export function DashboardPage() {
                     categories={["value"]}
                     colors={["rose"]}
                     layout="vertical"
-                    valueFormatter={(value: number) => `${value} komik`}
+                    valueFormatter={(value: number) => t("{count} komik", { count: value })}
                     showLegend={false}
                     showGridLines={false}
                     yAxisWidth={104}
@@ -249,7 +261,7 @@ export function DashboardPage() {
                   />
                 ) : (
                   <div className="flex h-48 items-center justify-center text-xs text-muted-foreground">
-                    Genre belum tersedia.
+                    {t("Genre belum tersedia.")}
                   </div>
                 )}
               </TremorCard>
@@ -257,8 +269,8 @@ export function DashboardPage() {
               <TremorCard className="rounded-[5px] !border-border/70 !ring-border/70 bg-card p-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <Title className="font-display text-lg font-bold">Paling sering dibaca</Title>
-                    <Text className="text-xs text-muted-foreground">Top 5 judul.</Text>
+                    <Title className="font-display text-lg font-bold">{t("Paling sering dibaca")}</Title>
+                    <Text className="text-xs text-muted-foreground">{t("Top 5 judul.")}</Text>
                   </div>
                   <Target className="h-5 w-5 text-primary" />
                 </div>
@@ -290,15 +302,15 @@ export function DashboardPage() {
                   </div>
                 ) : (
                   <div className="flex h-48 items-center justify-center text-xs text-muted-foreground">
-                    Belum ada chapter yang dibaca.
+                    {t("Belum ada chapter yang dibaca.")}
                   </div>
                 )}
 
                 <div className="mt-6 rounded-[5px] bg-secondary/60 p-4">
                   <div className="flex items-center justify-between text-[11px] font-bold">
-                    <span>Target mingguan</span>
+                    <span>{t("Target mingguan")}</span>
                     <span className="text-primary">
-                      {weekly}/{goal} chapter
+                      {t("{done}/{goal} chapter", { done: weekly, goal })}
                     </span>
                   </div>
                   <ProgressBar
@@ -308,8 +320,8 @@ export function DashboardPage() {
                   />
                   <p className="mt-2 text-[10px] text-muted-foreground">
                     {weekly >= goal
-                      ? "Target tercapai. Gila, konsisten banget."
-                      : `Kurang ${goal - weekly} chapter lagi buat capai target.`}
+                      ? t("Target tercapai. Gila, konsisten banget.")
+                      : t("Kurang {count} chapter lagi buat capai target.", { count: goal - weekly })}
                   </p>
                 </div>
               </TremorCard>
@@ -317,8 +329,8 @@ export function DashboardPage() {
               <TremorCard className="rounded-[5px] !border-border/70 !ring-border/70 bg-card p-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <Title className="font-display text-lg font-bold">Aktivitas terakhir</Title>
-                    <Text className="text-xs text-muted-foreground">10 kejadian terbaru.</Text>
+                    <Title className="font-display text-lg font-bold">{t("Aktivitas terakhir")}</Title>
+                    <Text className="text-xs text-muted-foreground">{t("10 kejadian terbaru.")}</Text>
                   </div>
                   <History className="h-5 w-5 text-muted-foreground" />
                 </div>
@@ -348,11 +360,11 @@ export function DashboardPage() {
                       </span>
                       <div className="min-w-0 flex-1">
                         <p className="line-clamp-1 text-[11px] font-semibold">
-                          {event.label}
+                          {t(event.label)}
                           {event.title ? <span className="font-normal text-muted-foreground"> · {event.title}</span> : null}
                         </p>
                         <p className="text-[10px] text-muted-foreground">
-                          {formatRelative(event.created_at)}
+                          {formatRelative(event.created_at, language)}
                         </p>
                       </div>
                     </div>
@@ -367,15 +379,15 @@ export function DashboardPage() {
                   <TrendingUp className="h-5 w-5" />
                 </span>
                 <div>
-                  <p className="text-sm font-bold">Koleksi lo tersimpan otomatis</p>
+                  <p className="text-sm font-bold">{t("Koleksi lo tersimpan otomatis")}</p>
                   <p className="text-xs text-muted-foreground">
-                    Riwayat baca dan komik favorit tetap rapi di satu tempat.
+                    {t("Riwayat baca dan komik favorit tetap rapi di satu tempat.")}
                   </p>
                 </div>
               </div>
               <Button asChild variant="outline" size="sm">
                 <Link to="/koleksi">
-                  Buka koleksi
+                  {t("Buka koleksi")}
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </Button>

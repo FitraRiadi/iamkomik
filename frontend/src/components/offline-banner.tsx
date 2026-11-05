@@ -1,7 +1,10 @@
 import * as React from "react"
 import { WifiOff } from "lucide-react"
 
+import { useI18n } from "@/lib/i18n"
+
 export function OfflineBanner() {
+  const { t } = useI18n()
   const [online, setOnline] = React.useState(() =>
     typeof navigator === "undefined" ? true : navigator.onLine,
   )
@@ -25,7 +28,7 @@ export function OfflineBanner() {
     >
       <span className="inline-flex items-center gap-1.5">
         <WifiOff className="h-3.5 w-3.5" />
-        Mode offline — halaman yang udah kebuka tetap bisa dibaca, data baru nyusul pas online.
+        {t("Mode offline — halaman yang udah kebuka tetap bisa dibaca, data baru nyusul pas online.")}
       </span>
     </div>
   )

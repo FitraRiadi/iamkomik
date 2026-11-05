@@ -1,11 +1,19 @@
 from __future__ import annotations
 
+import uuid
 from collections import Counter
 from datetime import timedelta
 
+from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
+from django.db import transaction
 from django.utils import timezone
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.authtoken.models import Token
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from . import services
@@ -13,12 +21,31 @@ from .models import ActivityEvent, Favorite, Reader, ReadingProgress
 from .serializers import FavoriteSerializer, ReadingProgressSerializer
 
 READING_MINUTES_PER_CHAPTER = 6
+User = get_user_model()
 
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+def _touch_reader(reader: Reader) -> Reader:
+    if reader and timezone.now() - reader.last_seen_at > timedelta(minutes=5):
+        Reader.objects.filter(pk=reader.pk).update(last_seen_at=timezone.now())
+    return reader
+
+
 def get_reader(request, create: bool = True):
+    user = getattr(request, "user", None)
+    if user is not None and getattr(user, "is_authenticated", False):
+        reader = Reader.objects.filter(user=user).first()
+        if reader is None and create:
+            display_name = (getattr(user, "first_name", "") or user.get_username())[:80]
+            reader = Reader.objects.create(
+                user=user,
+                token=f"user-{uuid.uuid4().hex}",
+                display_name=display_name,
+            )
+        return _touch_reader(reader) if reader else None
+
     token = (
         request.headers.get("X-Reader-Id")
         or request.query_params.get("reader")
@@ -27,15 +54,81 @@ def get_reader(request, create: bool = True):
     if not token or not (8 <= len(token) <= 64):
         return None
 
-    reader = Reader.objects.filter(token=token).first()
+    reader = Reader.objects.filter(token=token, user__isnull=True).first()
     if reader is None:
         if not create:
             return None
-        reader, _ = Reader.objects.get_or_create(token=token)
+        reader, _ = Reader.objects.get_or_create(token=token, defaults={"user": None})
 
-    if reader and timezone.now() - reader.last_seen_at > timedelta(minutes=5):
-        Reader.objects.filter(pk=reader.pk).update(last_seen_at=timezone.now())
-    return reader
+    return _touch_reader(reader)
+
+
+def merge_reader(user, anonymous_token: str | None) -> Reader | None:
+    """Gabungkan koleksi perangkat anonim ke reader milik akun."""
+    token = (anonymous_token or "").strip()
+    anonymous = None
+    if token and 8 <= len(token) <= 64:
+        anonymous = Reader.objects.filter(token=token, user__isnull=True).first()
+
+    target = Reader.objects.filter(user=user).first()
+
+    if target is None and anonymous is not None:
+        display_name = (user.first_name or user.get_username())[:80]
+        anonymous.user = user
+        anonymous.display_name = anonymous.display_name or display_name
+        anonymous.save(update_fields=["user", "display_name", "last_seen_at"])
+        return anonymous
+
+    if target is None:
+        display_name = (user.first_name or user.get_username())[:80]
+        return Reader.objects.create(
+            user=user,
+            token=f"user-{uuid.uuid4().hex}",
+            display_name=display_name,
+        )
+
+    if anonymous is None or anonymous.pk == target.pk:
+        return target
+
+    with transaction.atomic():
+        for item in anonymous.favorites.all():
+            Favorite.objects.update_or_create(
+                reader=target,
+                comic_slug=item.comic_slug,
+                defaults={
+                    "title": item.title,
+                    "image": item.image,
+                    "comic_type": item.comic_type,
+                    "genre": item.genre,
+                },
+            )
+        for item in anonymous.history.all():
+            ReadingProgress.objects.update_or_create(
+                reader=target,
+                comic_slug=item.comic_slug,
+                defaults={
+                    "title": item.title,
+                    "image": item.image,
+                    "comic_type": item.comic_type,
+                    "genre": item.genre,
+                    "chapter_slug": item.chapter_slug,
+                    "chapter_name": item.chapter_name,
+                    "chapter_index": item.chapter_index,
+                },
+            )
+        ActivityEvent.objects.filter(reader=anonymous).update(reader=target)
+        anonymous.delete()
+    return target
+
+
+def user_payload(user) -> dict:
+    name = user.first_name or user.get_username()
+    return {"id": user.id, "name": name, "email": user.email or user.get_username()}
+
+
+def auth_payload(user) -> dict:
+    token, _ = Token.objects.get_or_create(user=user)
+    return {"token": token.key, "user": user_payload(user)}
 
 
 def log_event(reader, event_type: str, **kwargs):
@@ -56,6 +149,88 @@ def split_genres(value: str) -> list[str]:
     if not value:
         return []
     return [part.strip() for part in value.replace("/", ",").split(",") if part.strip()]
+
+
+# ---------------------------------------------------------------------------
+# Accounts
+# ---------------------------------------------------------------------------
+@api_view(["POST"])
+@authentication_classes([])
+def register(request):
+    name = (request.data.get("name") or "").strip()
+    email = (request.data.get("email") or "").strip().lower()
+    password = request.data.get("password") or ""
+
+    if len(name) < 2:
+        return Response({"detail": "Nama minimal 2 karakter."}, status=status.HTTP_400_BAD_REQUEST)
+    if not email:
+        return Response({"detail": "Email wajib diisi."}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        validate_email(email)
+    except ValidationError:
+        return Response({"detail": "Format email tidak valid."}, status=status.HTTP_400_BAD_REQUEST)
+    if User.objects.filter(username__iexact=email).exists():
+        return Response(
+            {"detail": "Email ini sudah terdaftar. Coba masuk aja."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    try:
+        validate_password(password)
+    except ValidationError as exc:
+        return Response({"detail": " ".join(exc.messages)}, status=status.HTTP_400_BAD_REQUEST)
+
+    with transaction.atomic():
+        user = User.objects.create_user(
+            username=email,
+            email=email,
+            password=password,
+            first_name=name[:150],
+        )
+        merge_reader(user, request.headers.get("X-Reader-Id"))
+        payload = auth_payload(user)
+    return Response(payload, status=status.HTTP_201_CREATED)
+
+
+@api_view(["POST"])
+@authentication_classes([])
+def login(request):
+    identifier = (request.data.get("email") or request.data.get("username") or "").strip()
+    password = request.data.get("password") or ""
+    if not identifier or not password:
+        return Response(
+            {"detail": "Email dan password wajib diisi."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    username = identifier.lower() if "@" in identifier else identifier
+    user = authenticate(request, username=username, password=password)
+    if user is None:
+        return Response(
+            {"detail": "Email atau password salah."},
+            status=status.HTTP_401_UNAUTHORIZED,
+        )
+
+    merge_reader(user, request.headers.get("X-Reader-Id"))
+    return Response(auth_payload(user))
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def logout(request):
+    Token.objects.filter(user=request.user).delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def me(request):
+    reader = get_reader(request)
+    return Response(
+        {
+            "user": user_payload(request.user),
+            "has_reader": reader is not None,
+        }
+    )
 
 
 # ---------------------------------------------------------------------------

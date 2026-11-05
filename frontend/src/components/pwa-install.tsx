@@ -1,6 +1,8 @@
 import * as React from "react"
 import { Download, X } from "lucide-react"
 
+import { useI18n } from "@/lib/i18n"
+
 type InstallPromptEvent = Event & {
   prompt: () => Promise<void>
   userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>
@@ -18,6 +20,7 @@ function isStandalone() {
 }
 
 export function PwaInstall() {
+  const { t } = useI18n()
   const [promptEvent, setPromptEvent] = React.useState<InstallPromptEvent | null>(null)
   const [visible, setVisible] = React.useState(false)
   const [installing, setInstalling] = React.useState(false)
@@ -91,9 +94,9 @@ export function PwaInstall() {
           <Download className="h-5 w-5" />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-[13px] font-bold leading-tight">Pasang IamKomik</p>
+          <p className="text-[13px] font-bold leading-tight">{t("Pasang IamKomik")}</p>
           <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
-            Buka lebih cepat, layar penuh, dan tetap bisa lanjut baca saat koneksi putus.
+            {t("Buka lebih cepat, layar penuh, dan tetap bisa lanjut baca saat koneksi putus.")}
           </p>
           <div className="mt-2.5 flex items-center gap-2">
             <button
@@ -102,21 +105,21 @@ export function PwaInstall() {
               disabled={installing}
               className="rounded-full bg-primary px-3 py-1.5 text-[11px] font-bold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-60"
             >
-              {installing ? "Menyiapkan…" : "Pasang sekarang"}
+              {installing ? t("Menyiapkan…") : t("Pasang sekarang")}
             </button>
             <button
               type="button"
               onClick={dismiss}
               className="rounded-full px-2.5 py-1.5 text-[11px] font-bold text-muted-foreground transition hover:text-foreground"
             >
-              Nanti
+              {t("Nanti")}
             </button>
           </div>
         </div>
         <button
           type="button"
           onClick={dismiss}
-          aria-label="Tutup ajakan pasang aplikasi"
+          aria-label={t("Tutup ajakan pasang aplikasi")}
           className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-foreground"
         >
           <X className="h-3.5 w-3.5" />
