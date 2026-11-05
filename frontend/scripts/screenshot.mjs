@@ -22,14 +22,14 @@ await context.addInitScript(() => {
 const page = await context.newPage()
 
 const targets = [
-  { name: "home-top", url: "http://127.0.0.1:5173/", scroll: 0 },
-  { name: "home-trending", url: "http://127.0.0.1:5173/", scroll: 780 },
-  { name: "explore", url: "http://127.0.0.1:5173/jelajah", scroll: 0 },
-  { name: "comic-detail", url: "http://127.0.0.1:5173/komik/solo-swordmaster", scroll: 0 },
-  { name: "reader", url: "http://127.0.0.1:5173/baca/solo-swordmaster/solo-swordmaster-chapter-1", scroll: 0 },
-  { name: "library", url: "http://127.0.0.1:5173/koleksi", scroll: 0 },
-  { name: "dashboard", url: "http://127.0.0.1:5173/dashboard", scroll: 0 },
-  { name: "anime", url: "http://127.0.0.1:5173/anime", scroll: 0 },
+  { name: "home-top", url: "http://127.0.0.1:5187/", scroll: 0 },
+  { name: "home-trending", url: "http://127.0.0.1:5187/", scroll: 780 },
+  { name: "explore", url: "http://127.0.0.1:5187/jelajah", scroll: 0 },
+  { name: "comic-detail", url: "http://127.0.0.1:5187/komik/solo-swordmaster", scroll: 0 },
+  { name: "reader", url: "http://127.0.0.1:5187/baca/solo-swordmaster/solo-swordmaster-chapter-1", scroll: 0 },
+  { name: "library", url: "http://127.0.0.1:5187/koleksi", scroll: 0 },
+  { name: "dashboard", url: "http://127.0.0.1:5187/dashboard", scroll: 0 },
+  { name: "anime", url: "http://127.0.0.1:5187/anime", scroll: 0 },
 ]
 
 for (const target of targets) {
@@ -52,7 +52,7 @@ await mobile.addInitScript(() => {
   localStorage.setItem("iamkomik-theme", "light")
 })
 const mobilePage = await mobile.newPage()
-await mobilePage.goto("http://127.0.0.1:5173/", { waitUntil: "domcontentloaded", timeout: 60000 })
+await mobilePage.goto("http://127.0.0.1:5187/", { waitUntil: "domcontentloaded", timeout: 60000 })
 await mobilePage.waitForTimeout(9000)
 await mobilePage.screenshot({ path: `${out}\\mobile-home.png` })
 console.log("shot mobile-home")

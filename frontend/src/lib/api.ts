@@ -2,8 +2,10 @@ import axios from "axios"
 
 import { getReaderId } from "./reader"
 
+const apiBaseURL = (import.meta.env.VITE_API_BASE_URL || "/api").replace(/\/+$/, "")
+
 export const api = axios.create({
-  baseURL: "/api",
+  baseURL: apiBaseURL,
   timeout: 25_000,
 })
 

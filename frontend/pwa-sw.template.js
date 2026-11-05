@@ -48,7 +48,9 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url)
 
   // API responses stay network-only so collection/stat data is never stale.
-  if (url.origin === self.location.origin && url.pathname.startsWith("/api/")) return
+  // The API may live on a different origin in production (Vercel frontend +
+  // Vercel backend), so match the path regardless of origin.
+  if (url.pathname.startsWith("/api/")) return
 
   // SPA navigations: network first, fall back to the cached shell for offline.
   if (request.mode === "navigate") {

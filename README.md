@@ -61,17 +61,23 @@ IamKomik is a full-stack portfolio project: a React single-page app talking to a
 ```text
 Browser
   │
-  ├─ React SPA (Vite, port 5173 / 4173)
+  ├─ React SPA (Vite, local port 5187 / preview 4187)
   │     │
-  │     └─ /api/*  ──proxy──►  Django REST API (127.0.0.1:8010)
+  │     └─ /api/*  ──proxy──►  Django REST API (127.0.0.1:8123)
   │                                │
-  │                                ├─ PostgreSQL (readers, favorites, history, activity)
+  │                                ├─ PostgreSQL / Supabase (readers, favorites, history, activity)
   │                                └─ Sanka API (comics, chapters, anime, episodes)
   │
   └─ Service worker (production build only)
         ├─ precached app shell
         ├─ cache-first images and assets
         └─ network-only /api requests
+
+Production (Vercel)
+  │
+  ├─ iamkomik.vercel.app        React SPA (static Vite build)
+  └─ iamkomik-api.vercel.app    Django WSGI function ──► Supabase Postgres
+
 ```
 
 ## Project Structure
@@ -81,7 +87,10 @@ iamkomik/
 ├─ backend/                     Django API
 │  ├─ config/                   settings, URLs, WSGI
 │  ├─ core/                     models, views, serializers, upstream service, admin
-│  ├─ .env.example              environment template
+│  ├─ .env.example              local environment template
+│  ├─ .env.production.example   Vercel/Supabase environment template
+│  ├─ .python-version           Python runtime for Vercel
+│  ├─ vercel.json               Vercel function timeout config
 │  ├─ requirements.txt
 │  └─ manage.py
 ├─ frontend/                    Vite React app
@@ -92,8 +101,10 @@ iamkomik/
 │  │  ├─ hooks/                 API query and library context
 │  │  ├─ lib/                   API client, types, formatting, reader ID
 │  │  └─ pages/                 home, explore, comic, reader, library, anime, dashboard
+│  ├─ .env.production.example   Vercel frontend environment template
 │  ├─ pwa-sw.template.js        service worker template
 │  ├─ tailwind.config.js
+│  ├─ vercel.json               Vite SPA deployment config
 │  └─ vite.config.ts            dev/preview proxy and service worker emission
 └─ .gitignore
 ```
@@ -150,10 +161,12 @@ Create the PostgreSQL database (only once), then run migrations:
 createdb -U postgres iamkomik
 python manage.py migrate
 python manage.py createsuperuser   # optional, enables /admin
-python manage.py runserver 127.0.0.1:8010
+python manage.py runserver 127.0.0.1:8123
 ```
 
-The API is available at `http://127.0.0.1:8010/api/health/`.
+The API is available at `http://127.0.0.1:8123/api/health/`.
+
+> To use a Supabase database for local development instead, set `DATABASE_URL` in `backend/.env`. The `POSTGRES_*` values remain the fallback for a local Postgres instance.
 
 ### 3. Run the frontend
 
@@ -163,7 +176,7 @@ pnpm install
 pnpm dev
 ```
 
-Open `http://localhost:5173`. Vite proxies `/api` to `http://127.0.0.1:8010`.
+Open `http://localhost:5187`. Vite proxies `/api` to `http://127.0.0.1:8123`.
 
 ### 4. Build and test the PWA
 
@@ -172,31 +185,105 @@ The service worker is generated only for production builds:
 ```bash
 cd frontend
 pnpm build
-pnpm preview --host 127.0.0.1
+pnpm preview
 ```
 
-Open `http://127.0.0.1:4173`.
+Open `http://127.0.0.1:4187`.
 
 > PWA installation requires a secure context. `localhost` and `127.0.0.1` work during development; production deployments need HTTPS. Make sure `/sw.js`, `/manifest.webmanifest`, and `/icons/*` are publicly reachable.
 
 ## Environment Variables
 
-Copy `backend/.env.example` to `backend/.env` and adjust the values. Never commit `.env`.
+Copy `backend/.env.example` to `backend/.env` and adjust the values. Never commit `.env`. Production values live in Vercel project settings; `backend/.env.production.example` documents the required keys.
 
 | Variable | Required | Default | Purpose |
 | --- | --- | --- | --- |
 | `DJANGO_SECRET_KEY` | Yes | dev fallback | Django signing key |
 | `DJANGO_DEBUG` | No | `True` | Debug mode; disable in production |
-| `DJANGO_ALLOWED_HOSTS` | No | `localhost,127.0.0.1` | Comma-separated allowed hosts |
-| `POSTGRES_DB` | Yes | `iamkomik` | Database name |
-| `POSTGRES_USER` | Yes | `postgres` | Database user |
-| `POSTGRES_PASSWORD` | Yes | empty | Database password |
-| `POSTGRES_HOST` | No | `127.0.0.1` | Database host |
-| `POSTGRES_PORT` | No | `5432` | Database port |
+| `DJANGO_ALLOWED_HOSTS` | No | `localhost,127.0.0.1,.vercel.app` | Comma-separated allowed hosts |
+| `POSTGRES_DB` | Local only | `iamkomik` | Local database name |
+| `POSTGRES_USER` | Local only | `postgres` | Local database user |
+| `POSTGRES_PASSWORD` | Local only | empty | Local database password |
+| `POSTGRES_HOST` | No | `127.0.0.1` | Local database host |
+| `POSTGRES_PORT` | No | `5432` | Local database port |
+| `DATABASE_URL` | Production | empty | Supabase/managed Postgres URL; overrides `POSTGRES_*` |
+| `DB_CONN_MAX_AGE` | No | `0` with `DATABASE_URL`, `60` locally | Persistent DB connection age |
+| `DB_SSL_REQUIRE` | No | `true` | Require SSL for `DATABASE_URL` |
+| `DB_DISABLE_SERVER_SIDE_CURSORS` | No | `true` | Required for Supabase transaction pooler |
 | `SANKAA_API_BASE` | No | `https://www.sankavollerei.web.id` | Upstream content API |
-| `CORS_ALLOWED_ORIGINS` | No | `http://localhost:5173,http://127.0.0.1:5173` | Allowed browser origins |
+| `CORS_ALLOWED_ORIGINS` | No | `http://localhost:5187,http://127.0.0.1:5187` | Allowed browser origins |
+| `CORS_ALLOWED_ORIGIN_REGEXES` | No | empty | Regex allow-list, useful for Vercel preview URLs |
+| `CSRF_TRUSTED_ORIGINS` | No | same as CORS origins | Trusted origins for Django admin/CSRF |
+| `DJANGO_SECURE_COOKIES` | No | `true` when `DEBUG=False` | Secure session/CSRF cookies |
 
-The frontend uses relative `/api` requests and does not require its own environment file.
+The frontend uses relative `/api` requests locally. For a deployed frontend, set `VITE_API_BASE_URL` to the API origin plus `/api` (for example `https://iamkomik-api.vercel.app/api`). See `frontend/.env.production.example`.
+
+## Deployment (Supabase + Vercel)
+
+The repository is set up for two Vercel projects that share the same GitHub repo:
+
+| Vercel project | Root directory | Output |
+| --- | --- | --- |
+| `iamkomik` | `frontend` | Static Vite SPA |
+| `iamkomik-api` | `backend` | Django WSGI Python function |
+
+### 1. Create a new Supabase project
+
+Create a **new** Supabase project for IamKomik. Do not reuse a Supabase project that already contains another application's tables.
+
+From **Project Settings → Database → Connection string**, copy the connection pooler URL (transaction mode, port `6543`) and keep `?sslmode=require`. It looks like:
+
+```text
+postgresql://postgres.<project-ref>:<password>@aws-0-<region>.pooler.supabase.com:6543/postgres?sslmode=require
+```
+
+Run the Django migrations once from your machine with `DATABASE_URL` set:
+
+```powershell
+cd backend
+$env:DATABASE_URL = "postgresql://...:6543/postgres?sslmode=require"
+python manage.py migrate
+```
+
+You can also use the direct connection (port `5432`) for migrations and the pooler URL for the Vercel runtime.
+
+### 2. Deploy the backend to Vercel
+
+Create a Vercel project named `iamkomik-api`:
+
+- **Root Directory:** `backend`
+- **Framework Preset:** Django
+- **Build Command:** leave empty (Vercel installs `requirements.txt`, runs `collectstatic`, and uses `config/wsgi.py`)
+- **Environment variables:** copy the keys from `backend/.env.production.example`
+  - `DATABASE_URL` = Supabase pooler URL
+  - `DJANGO_SECRET_KEY` = a long random value
+  - `DJANGO_DEBUG=False`
+  - `DJANGO_ALLOWED_HOSTS=.vercel.app`
+  - `CORS_ALLOWED_ORIGINS=https://<frontend-domain>`
+  - optionally `CORS_ALLOWED_ORIGIN_REGEXES` for preview deployments
+
+Vercel detects Django from `manage.py` and `WSGI_APPLICATION`, then routes every request to `config/wsgi.py`. `backend/vercel.json` only raises the function timeout.
+
+### 3. Deploy the frontend to Vercel
+
+Create a Vercel project named `iamkomik`:
+
+- **Root Directory:** `frontend`
+- **Framework Preset:** Vite
+- **Build Command:** `pnpm build`
+- **Output Directory:** `dist`
+- **Environment variable:** `VITE_API_BASE_URL=https://<backend-domain>/api`
+
+`frontend/vercel.json` adds the SPA fallback so deep links like `/komik/...` resolve to `index.html`.
+
+### 4. Check the deployment
+
+```text
+https://<backend-domain>/api/health/
+https://<frontend-domain>/
+```
+
+Because the frontend and API are on different origins in production, the backend must list the frontend origin in `CORS_ALLOWED_ORIGINS`. The service worker treats `/api/` requests as network-only on any origin, so library and statistics data stay fresh.
 
 ## API Reference
 
@@ -226,7 +313,7 @@ All read endpoints accept an optional `X-Reader-Id` header. The frontend stores 
 
 - The service worker precaches the app shell, manifest, icons, and hashed Vite assets.
 - Images and chapter assets are cached cache-first after they are viewed.
-- `/api/` requests stay network-only so library data and statistics are never stale.
+- `/api/` requests stay network-only on both same-origin local setups and cross-origin production deployments, so library data and statistics are never stale.
 - The install prompt appears when the browser reports installability. On iOS, use **Share → Add to Home Screen**.
 - The mobile dock respects `env(safe-area-inset-bottom)` so it clears the home indicator on modern phones.
 
@@ -253,12 +340,12 @@ pnpm preview   # serve the production build locally
 ```bash
 python manage.py migrate
 python manage.py createsuperuser
-python manage.py runserver 127.0.0.1:8010
+python manage.py runserver 127.0.0.1:8123
 ```
 
 ## Notes and Troubleshooting
 
-- The backend intentionally runs on port **8010** to avoid conflicts with other local projects. If you change it, update `frontend/vite.config.ts`.
+- The local backend runs on port **8123**, the Vite dev server on **5187**, and the preview server on **4187**. These non-default ports avoid conflicts with other local projects; `strictPort` makes Vite fail loudly if one is occupied. If you change the backend port, update `frontend/vite.config.ts`.
 - Some images, iframes, or CDN assets block hotlinking. Readers use `referrerPolicy="no-referrer"`; if an embedded player still fails, use the **Open player in a new tab** action.
 - The upstream API is rate-limited. The backend caches expensive responses in memory for five minutes; restarting the API clears that cache.
 - Favorites and history are tied to the anonymous reader ID. Use **Copy ID** on the Library page to move a collection to another browser.

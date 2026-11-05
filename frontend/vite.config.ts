@@ -8,7 +8,7 @@ import { defineConfig, type Plugin } from "vite"
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 const apiProxy = {
   "/api": {
-    target: "http://127.0.0.1:8010",
+    target: "http://127.0.0.1:8123",
     changeOrigin: true,
   },
 }
@@ -55,11 +55,15 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5173,
+    host: "0.0.0.0",
+    port: 5187,
+    strictPort: true,
     proxy: apiProxy,
   },
   preview: {
-    port: 4173,
+    host: "0.0.0.0",
+    port: 4187,
+    strictPort: true,
     proxy: apiProxy,
   },
 })
