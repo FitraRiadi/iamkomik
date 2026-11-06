@@ -83,7 +83,7 @@ export function RegisterPage() {
 
   return (
     <PageTransition>
-      <div className="container py-10 sm:py-14">
+      <div className="container py-8 sm:py-14">
         <div className="mx-auto grid max-w-5xl overflow-hidden rounded-[5px] border border-border/70 bg-card shadow-float lg:grid-cols-[1fr_1.05fr]">
           <div className="relative hidden overflow-hidden bg-gradient-to-br from-primary via-primary to-rose-700 p-9 text-primary-foreground lg:block">
             <div className="absolute -right-16 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
