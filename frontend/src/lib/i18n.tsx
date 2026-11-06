@@ -400,6 +400,17 @@ const translations: Record<string, string> = {
     "Sign in from another device to open the same library and history.",
   "atau": "or",
 
+  // Site prompts
+  "Masuk untuk menyimpan koleksi, melanjutkan bacaan, dan membuka statistik Anda.":
+    "Sign in to save your library, continue reading, and open your stats.",
+  "Tutup ajakan masuk": "Close sign-in prompt",
+  "Kami memakai cookie": "We use cookies",
+  "Cookie dan penyimpanan lokal menjaga sesi masuk, tema, dan preferensi Anda. Cookie penting tetap aktif.":
+    "Cookies and local storage keep your session, theme, and preferences. Essential cookies stay active.",
+  "Terima": "Accept",
+  "Tolak": "Reject",
+  "Tutup pemberitahuan cookie": "Close cookie notice",
+
   // Toasts / errors
   "Gagal menghapus": "Failed to remove",
   "Gagal menghapus riwayat": "Failed to remove history",

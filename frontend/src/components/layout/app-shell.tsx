@@ -4,7 +4,7 @@ import { MobileNav } from "@/components/layout/mobile-nav"
 import { SiteFooter } from "@/components/layout/site-footer"
 import { SiteHeader } from "@/components/layout/site-header"
 import { OfflineBanner } from "@/components/offline-banner"
-import { PwaInstall } from "@/components/pwa-install"
+import { SitePrompts } from "@/components/layout/site-prompts"
 import { cn } from "@/lib/utils"
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -23,7 +23,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <main className="flex-1">{children}</main>
       {!immersive ? <SiteFooter /> : null}
       {!immersive ? <MobileNav /> : null}
-      {!immersive ? <PwaInstall /> : null}
+      {!immersive ? <SitePrompts /> : null}
     </div>
   )
 }

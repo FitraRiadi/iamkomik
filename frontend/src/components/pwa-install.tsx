@@ -19,7 +19,7 @@ function isStandalone() {
   )
 }
 
-export function PwaInstall() {
+export function PwaInstall({ hidden = false }: { hidden?: boolean }) {
   const { t } = useI18n()
   const [promptEvent, setPromptEvent] = React.useState<InstallPromptEvent | null>(null)
   const [visible, setVisible] = React.useState(false)
@@ -85,11 +85,11 @@ export function PwaInstall() {
     }
   }
 
-  if (!visible) return null
+  if (hidden || !visible) return null
 
   return (
-    <div className="fixed inset-x-3 bottom-[calc(5.6rem+env(safe-area-inset-bottom))] z-50 md:inset-x-auto md:bottom-6 md:right-6 md:w-[340px]">
-      <div className="flex items-start gap-3 rounded-[5px] border border-border/70 bg-card/95 p-3.5 shadow-float backdrop-blur-2xl">
+    <div className="pointer-events-auto w-full rounded-[5px] border border-border/70 bg-card/95 p-3.5 shadow-float backdrop-blur-2xl">
+      <div className="flex items-start gap-3">
         <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary">
           <Download className="h-5 w-5" />
         </span>
