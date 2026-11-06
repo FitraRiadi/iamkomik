@@ -262,6 +262,17 @@ def google_login(request):
         user = User.objects.create_user(username=email, email=email, first_name=name)
         user.set_unusable_password()
         user.save(update_fields=["password"])
+    elif user.has_usable_password():
+        # Jangan tautkan akun password yang mungkin didaftarkan orang lain dengan email ini.
+        return Response(
+            {
+                "detail": (
+                    "Email ini sudah terdaftar dengan password. "
+                    "Silakan masuk menggunakan email dan password."
+                )
+            },
+            status=status.HTTP_409_CONFLICT,
+        )
     else:
         changed = []
         if not user.email:
