@@ -11,6 +11,7 @@ export interface AuthUser {
   id: number
   name: string
   email: string
+  avatar: string
 }
 
 interface AuthResponse {
@@ -25,6 +26,8 @@ interface AuthContextValue {
   isAuthenticated: boolean
   login: (email: string, password: string) => Promise<AuthUser>
   register: (name: string, email: string, password: string) => Promise<AuthUser>
+  googleLogin: (credential: string) => Promise<AuthUser>
+  updateProfile: (data: { name?: string; avatar?: string }) => Promise<AuthUser>
   logout: () => Promise<void>
   refresh: () => Promise<void>
 }
@@ -93,6 +96,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [applyToken],
   )
 
+  const googleLogin = React.useCallback(
+    async (credential: string) => {
+      const response = await api.post<AuthResponse>("/auth/google/", { credential })
+      applyToken(response.data.token)
+      setUser(response.data.user)
+      setLoading(false)
+      notifyAuthChanged()
+      return response.data.user
+    },
+    [applyToken],
+  )
+
+  const updateProfile = React.useCallback(
+    async (data: { name?: string; avatar?: string }) => {
+      const response = await api.patch<{ user: AuthUser }>("/auth/profile/", data)
+      setUser(response.data.user)
+      notifyAuthChanged()
+      return response.data.user
+    },
+    [],
+  )
+
   const logout = React.useCallback(async () => {
     try {
       await api.post("/auth/logout/")
@@ -114,10 +139,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isAuthenticated: Boolean(user && token),
       login,
       register,
+      googleLogin,
+      updateProfile,
       logout,
       refresh,
     }),
-    [user, token, loading, login, register, logout, refresh],
+    [user, token, loading, login, register, googleLogin, updateProfile, logout, refresh],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

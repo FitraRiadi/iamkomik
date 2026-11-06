@@ -28,7 +28,7 @@ export function OfflineBanner() {
     >
       <span className="inline-flex items-center gap-1.5">
         <WifiOff className="h-3.5 w-3.5" />
-        {t("Mode offline — halaman yang udah kebuka tetap bisa dibaca, data baru nyusul pas online.")}
+        {t("Mode offline: halaman yang sudah dibuka tetap dapat dibaca; data baru akan dimuat saat kembali online.")}
       </span>
     </div>
   )

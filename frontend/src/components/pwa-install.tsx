@@ -96,7 +96,7 @@ export function PwaInstall() {
         <div className="min-w-0 flex-1">
           <p className="text-[13px] font-bold leading-tight">{t("Pasang IamKomik")}</p>
           <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
-            {t("Buka lebih cepat, layar penuh, dan tetap bisa lanjut baca saat koneksi putus.")}
+            {t("Buka lebih cepat, layar penuh, dan tetap dapat melanjutkan bacaan saat koneksi terputus.")}
           </p>
           <div className="mt-2.5 flex items-center gap-2">
             <button

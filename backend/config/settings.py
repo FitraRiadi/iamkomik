@@ -20,6 +20,7 @@ def env_bool(name: str, default: bool = False) -> bool:
 
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-iamkomik-secret")
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "").strip()
 DEBUG = env_bool("DJANGO_DEBUG", True)
 ALLOWED_HOSTS = env_list(
     "DJANGO_ALLOWED_HOSTS",

@@ -1,9 +1,10 @@
 import * as React from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useNavigate, useSearchParams } from "react-router-dom"
 import { ArrowRight, BookmarkCheck, KeyRound, Loader2, Mail, Sparkles, UserRound } from "lucide-react"
 import { toast } from "sonner"
 
 import { PageTransition } from "@/components/page-transition"
+import { GoogleSignIn } from "@/components/google-sign-in"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { getErrorMessage } from "@/lib/api"
@@ -12,7 +13,8 @@ import { useI18n } from "@/lib/i18n"
 
 export function RegisterPage() {
   const navigate = useNavigate()
-  const { user, register } = useAuth()
+  const [searchParams] = useSearchParams()
+  const { user, register, googleLogin } = useAuth()
   const { t } = useI18n()
 
   const [name, setName] = React.useState("")
@@ -22,9 +24,11 @@ export function RegisterPage() {
   const [busy, setBusy] = React.useState(false)
   const [error, setError] = React.useState("")
 
+  const next = searchParams.get("next") || "/koleksi"
+
   React.useEffect(() => {
-    if (user) navigate("/koleksi", { replace: true })
-  }, [navigate, user])
+    if (user) navigate(next, { replace: true })
+  }, [navigate, next, user])
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -47,15 +51,29 @@ export function RegisterPage() {
       return
     }
     if (password !== confirm) {
-      setError(t("Konfirmasi password belum cocok."))
+      setError(t("Konfirmasi password tidak cocok."))
       return
     }
 
     setBusy(true)
     try {
       await register(name.trim(), email.trim(), password)
-      toast.success(t("Akun berhasil dibuat. Selamat baca!"))
-      navigate("/koleksi", { replace: true })
+      toast.success(t("Akun berhasil dibuat. Selamat membaca!"))
+      navigate(next, { replace: true })
+    } catch (requestError) {
+      setError(getErrorMessage(requestError))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const handleGoogle = async (credential: string) => {
+    setError("")
+    setBusy(true)
+    try {
+      await googleLogin(credential)
+      toast.success(t("Akun berhasil dibuat. Selamat membaca!"))
+      navigate(next, { replace: true })
     } catch (requestError) {
       setError(getErrorMessage(requestError))
     } finally {
@@ -72,9 +90,13 @@ export function RegisterPage() {
             <div className="absolute -bottom-24 left-1/4 h-64 w-64 rounded-full bg-black/10 blur-3xl" />
             <div className="relative flex h-full flex-col justify-between">
               <Link to="/" className="inline-flex items-center gap-2.5">
-                <span className="grid h-10 w-10 place-items-center rounded-[13px] bg-white/15 font-display text-base font-extrabold">
-                  ik
-                </span>
+                <img
+                  src="/brand-logo.png"
+                  alt=""
+                  width={40}
+                  height={40}
+                  className="h-10 w-10 rounded-[13px] object-cover"
+                />
                 <span className="font-display text-2xl font-extrabold tracking-[-0.04em]">
                   iamkomik<span className="text-white/70">.</span>
                 </span>
@@ -86,13 +108,13 @@ export function RegisterPage() {
                   {t("Akun")}
                 </span>
                 <h2 className="headline mt-4 text-4xl leading-tight text-white">
-                  {t("Bacaan lo, rapi di sini.")}
+                  {t("Bacaan Anda, rapi di sini.")}
                 </h2>
                 <ul className="mt-6 space-y-3 text-sm text-white/85">
                   {[
-                    t("Koleksi dan riwayat tersinkron ke akun."),
-                    t("Bisa lanjut baca di perangkat lain."),
-                    t("Data perangkat lama otomatis digabung."),
+                    t("Koleksi dan riwayat tersinkronisasi ke akun."),
+                    t("Dapat melanjutkan bacaan di perangkat lain."),
+                    t("Data perangkat lama digabungkan secara otomatis."),
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-2.5">
                       <BookmarkCheck className="mt-0.5 h-4 w-4 shrink-0 text-white" />
@@ -112,7 +134,7 @@ export function RegisterPage() {
               {t("Buat akun baru")}
             </h1>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              {t("Daftar gratis, koleksi lo langsung tersimpan di akun.")}
+              {t("Daftar gratis; koleksi Anda langsung tersimpan di akun.")}
             </p>
 
             <form onSubmit={submit} className="mt-7 space-y-4">
@@ -193,9 +215,23 @@ export function RegisterPage() {
               </Button>
             </form>
 
+            {import.meta.env.VITE_GOOGLE_CLIENT_ID ? (
+              <div className="mt-5 space-y-4">
+                <div className="flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                  <span className="h-px flex-1 bg-border" />
+                  {t("atau")}
+                  <span className="h-px flex-1 bg-border" />
+                </div>
+                <GoogleSignIn onCredential={handleGoogle} />
+              </div>
+            ) : null}
+
             <p className="mt-6 text-center text-sm text-muted-foreground">
               {t("Sudah punya akun?")}{" "}
-              <Link to="/masuk" className="font-bold text-primary hover:underline">
+              <Link
+                to={next === "/koleksi" ? "/masuk" : `/masuk?next=${encodeURIComponent(next)}`}
+                className="font-bold text-primary hover:underline"
+              >
                 {t("Masuk sekarang")}
               </Link>
             </p>

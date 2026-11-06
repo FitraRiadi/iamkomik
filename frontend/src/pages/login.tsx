@@ -4,6 +4,7 @@ import { ArrowRight, BookmarkCheck, KeyRound, Loader2, Mail, Sparkles } from "lu
 import { toast } from "sonner"
 
 import { PageTransition } from "@/components/page-transition"
+import { GoogleSignIn } from "@/components/google-sign-in"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { getErrorMessage } from "@/lib/api"
@@ -13,7 +14,7 @@ import { useI18n } from "@/lib/i18n"
 export function LoginPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { user, login } = useAuth()
+  const { user, login, googleLogin } = useAuth()
   const { t } = useI18n()
 
   const [email, setEmail] = React.useState("")
@@ -43,7 +44,21 @@ export function LoginPage() {
     setBusy(true)
     try {
       await login(email.trim(), password)
-      toast.success(t("Berhasil masuk. Selamat baca!"))
+      toast.success(t("Berhasil masuk. Selamat membaca!"))
+      navigate(next, { replace: true })
+    } catch (requestError) {
+      setError(getErrorMessage(requestError))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const handleGoogle = async (credential: string) => {
+    setError("")
+    setBusy(true)
+    try {
+      await googleLogin(credential)
+      toast.success(t("Berhasil masuk. Selamat membaca!"))
       navigate(next, { replace: true })
     } catch (requestError) {
       setError(getErrorMessage(requestError))
@@ -61,9 +76,13 @@ export function LoginPage() {
             <div className="absolute -bottom-24 left-1/4 h-64 w-64 rounded-full bg-black/10 blur-3xl" />
             <div className="relative flex h-full flex-col justify-between">
               <Link to="/" className="inline-flex items-center gap-2.5">
-                <span className="grid h-10 w-10 place-items-center rounded-[13px] bg-white/15 font-display text-base font-extrabold">
-                  ik
-                </span>
+                <img
+                  src="/brand-logo.png"
+                  alt=""
+                  width={40}
+                  height={40}
+                  className="h-10 w-10 rounded-[13px] object-cover"
+                />
                 <span className="font-display text-2xl font-extrabold tracking-[-0.04em]">
                   iamkomik<span className="text-white/70">.</span>
                 </span>
@@ -75,13 +94,13 @@ export function LoginPage() {
                   {t("Akun")}
                 </span>
                 <h2 className="headline mt-4 text-4xl leading-tight text-white">
-                  {t("Bacaan lo, rapi di sini.")}
+                  {t("Bacaan Anda, rapi di sini.")}
                 </h2>
                 <ul className="mt-6 space-y-3 text-sm text-white/85">
                   {[
-                    t("Koleksi dan riwayat tersinkron ke akun."),
-                    t("Bisa lanjut baca di perangkat lain."),
-                    t("Data perangkat lama otomatis digabung."),
+                    t("Koleksi dan riwayat tersinkronisasi ke akun."),
+                    t("Dapat melanjutkan bacaan di perangkat lain."),
+                    t("Data perangkat lama digabungkan secara otomatis."),
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-2.5">
                       <BookmarkCheck className="mt-0.5 h-4 w-4 shrink-0 text-white" />
@@ -101,7 +120,7 @@ export function LoginPage() {
               {t("Selamat datang kembali")}
             </h1>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              {t("Masuk ke akun IamKomik buat sinkronin koleksi dan riwayat baca lo.")}
+              {t("Masuk ke akun IamKomik untuk menyinkronkan koleksi dan riwayat baca Anda.")}
             </p>
 
             <form onSubmit={submit} className="mt-7 space-y-4">
@@ -145,13 +164,27 @@ export function LoginPage() {
 
               <Button type="submit" size="lg" className="w-full" disabled={busy}>
                 {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
-                {busy ? t("Mencoba masuk…") : t("Masuk")}
+                {busy ? t("Sedang masuk…") : t("Masuk")}
               </Button>
             </form>
 
+            {import.meta.env.VITE_GOOGLE_CLIENT_ID ? (
+              <div className="mt-5 space-y-4">
+                <div className="flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                  <span className="h-px flex-1 bg-border" />
+                  {t("atau")}
+                  <span className="h-px flex-1 bg-border" />
+                </div>
+                <GoogleSignIn onCredential={handleGoogle} />
+              </div>
+            ) : null}
+
             <p className="mt-6 text-center text-sm text-muted-foreground">
               {t("Belum punya akun?")}{" "}
-              <Link to="/daftar" className="font-bold text-primary hover:underline">
+              <Link
+                to={next === "/koleksi" ? "/daftar" : `/daftar?next=${encodeURIComponent(next)}`}
+                className="font-bold text-primary hover:underline"
+              >
                 {t("Daftar sekarang")}
               </Link>
             </p>

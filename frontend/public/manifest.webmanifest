@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "IamKomik — Komik & Anime Tanpa Ribet",
+  "name": "IamKomik - Komik dan Anime",
   "short_name": "IamKomik",
-  "description": "Jelajahi komik dan anime terbaru dengan tampilan ala Pinterest. Simpan favorit, lanjut baca, dan pantau statistik bacaan lo.",
+  "description": "Jelajahi komik dan anime terbaru dengan tampilan yang rapi. Simpan favorit, lanjutkan bacaan, dan pantau statistik membaca Anda.",
   "lang": "id",
   "dir": "ltr",
   "start_url": "/",
@@ -40,16 +40,16 @@
       "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     },
     {
-      "name": "Koleksi gue",
+      "name": "Koleksi",
       "short_name": "Koleksi",
-      "description": "Favorit dan riwayat baca lo.",
+      "description": "Favorit dan riwayat baca Anda.",
       "url": "/koleksi",
       "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Statistik bacaan",
       "short_name": "Statistik",
-      "description": "Lihat streak dan kebiasaan baca lo.",
+      "description": "Lihat rentetan dan kebiasaan membaca Anda.",
       "url": "/dashboard",
       "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     }

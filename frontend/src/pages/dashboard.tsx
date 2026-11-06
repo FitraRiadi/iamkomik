@@ -32,6 +32,7 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useApiQuery } from "@/hooks/use-api-query"
 import { useLibrary } from "@/hooks/use-library"
+import { useAuth } from "@/lib/auth"
 import { formatMinutes, formatRelative, greeting } from "@/lib/format"
 import { useI18n } from "@/lib/i18n"
 import type { StatsPayload } from "@/lib/types"
@@ -42,6 +43,7 @@ const chartColors = ["rose", "zinc", "amber", "sky", "violet", "emerald"]
 export function DashboardPage() {
   const { data, loading, error, refetch } = useApiQuery<StatsPayload>("/stats/")
   const { history } = useLibrary()
+  const { user } = useAuth()
   const { t, language } = useI18n()
 
   const totals = data?.totals
@@ -68,12 +70,12 @@ export function DashboardPage() {
       <div className="container pt-10">
         <section className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
           <div>
-            <p className="eyebrow">{t("Reading insights")}</p>
+            <p className="eyebrow">{t("Ringkasan membaca")}</p>
             <h1 className="headline mt-2 text-4xl text-balance sm:text-5xl">
-              {greeting(language)}, Fit.
+              {greeting(language)}, {user?.name ?? t("Pembaca")}.
             </h1>
             <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
-              {t("Ini ringkasan kebiasaan baca lo. Semua dihitung dari aktivitas nyata di perangkat ini — bukan data karangan.")}
+              {t("Ini ringkasan kebiasaan membaca Anda. Semua dihitung dari aktivitas nyata di perangkat ini, bukan data karangan.")}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -81,7 +83,7 @@ export function DashboardPage() {
               <Button asChild size="sm">
                 <Link to={`/baca/${encodeURIComponent(lastChapter.comic_slug)}/${encodeURIComponent(lastChapter.chapter_slug)}`}>
                   <BookOpen className="h-3.5 w-3.5" />
-                  {t("Lanjut baca")}
+                  {t("Lanjutkan membaca")}
                 </Link>
               </Button>
             ) : (
@@ -101,7 +103,7 @@ export function DashboardPage() {
           <div className="mt-8">
             <EmptyState
               icon={History}
-              title={t("Statistik belum bisa dimuat")}
+              title={t("Statistik belum dapat dimuat")}
               description={error}
               actionLabel={t("Coba lagi")}
               actionHref="/dashboard"
@@ -116,7 +118,7 @@ export function DashboardPage() {
             <EmptyState
               icon={Sparkles}
               title={t("Belum ada jejak bacaan")}
-              description={t("Buka satu chapter komik dulu, statistik, streak, dan genre favorit lo bakal otomatis muncul di sini.")}
+              description={t("Buka satu chapter komik terlebih dahulu; statistik, streak, dan genre favorit Anda akan muncul di sini secara otomatis.")}
               actionLabel={t("Mulai jelajah")}
               actionHref="/jelajah"
             />
@@ -149,7 +151,7 @@ export function DashboardPage() {
               <KpiCard
                 index={3}
                 icon={Flame}
-                label={t("Streak baca")}
+                label={t("Rentetan membaca")}
                 value={totals?.streak_days ?? 0}
                 hint={t("hari beruntun")}
                 suffix={t("hari")}
@@ -162,7 +164,7 @@ export function DashboardPage() {
                   <div>
                     <Title className="font-display text-lg font-bold">{t("Aktivitas 14 hari")}</Title>
                     <Text className="text-xs text-muted-foreground">
-                      {t("Chapter yang dibaca vs komik yang dibuka.")}
+                      {t("Chapter yang dibaca dibandingkan komik yang dibuka.")}
                     </Text>
                   </div>
                   <div className="flex items-center gap-3 text-[11px] font-semibold">
@@ -196,7 +198,7 @@ export function DashboardPage() {
                   </span>
                   <span className="inline-flex items-center gap-1.5">
                     <Clock3 className="h-3.5 w-3.5" />
-                    {t("Estimasi {time} membaca", {
+                    {t("Estimasi waktu membaca {time}", {
                       time: formatMinutes(totals?.reading_minutes ?? 0, language),
                     })}
                   </span>
@@ -205,7 +207,7 @@ export function DashboardPage() {
 
               <TremorCard className="rounded-[5px] !border-border/70 !ring-border/70 bg-card p-5">
                 <Title className="font-display text-lg font-bold">{t("Tipe komik")}</Title>
-                <Text className="text-xs text-muted-foreground">{t("Dari favorit + riwayat baca.")}</Text>
+                <Text className="text-xs text-muted-foreground">{t("Dari favorit dan riwayat baca.")}</Text>
                 {data?.types?.length ? (
                   <DonutChart
                     className="mt-4 h-52"
@@ -243,7 +245,7 @@ export function DashboardPage() {
               <TremorCard className="rounded-[5px] !border-border/70 !ring-border/70 bg-card p-5">
                 <Title className="font-display text-lg font-bold">{t("Genre teratas")}</Title>
                 <Text className="text-xs text-muted-foreground">
-                  {t("Genre yang paling sering lo buka.")}
+                  {t("Genre yang paling sering Anda buka.")}
                 </Text>
                 {data?.genres?.length ? (
                   <BarChart
@@ -320,8 +322,8 @@ export function DashboardPage() {
                   />
                   <p className="mt-2 text-[10px] text-muted-foreground">
                     {weekly >= goal
-                      ? t("Target tercapai. Gila, konsisten banget.")
-                      : t("Kurang {count} chapter lagi buat capai target.", { count: goal - weekly })}
+                      ? t("Target tercapai. Konsistensi Anda luar biasa.")
+                      : t("Kurang {count} chapter lagi untuk mencapai target.", { count: goal - weekly })}
                   </p>
                 </div>
               </TremorCard>
@@ -379,7 +381,7 @@ export function DashboardPage() {
                   <TrendingUp className="h-5 w-5" />
                 </span>
                 <div>
-                  <p className="text-sm font-bold">{t("Koleksi lo tersimpan otomatis")}</p>
+                  <p className="text-sm font-bold">{t("Koleksi Anda tersimpan otomatis")}</p>
                   <p className="text-xs text-muted-foreground">
                     {t("Riwayat baca dan komik favorit tetap rapi di satu tempat.")}
                   </p>

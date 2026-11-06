@@ -4,6 +4,8 @@ import uuid
 from collections import Counter
 from datetime import timedelta
 
+import requests
+from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
@@ -35,32 +37,17 @@ def _touch_reader(reader: Reader) -> Reader:
 
 def get_reader(request, create: bool = True):
     user = getattr(request, "user", None)
-    if user is not None and getattr(user, "is_authenticated", False):
-        reader = Reader.objects.filter(user=user).first()
-        if reader is None and create:
-            display_name = (getattr(user, "first_name", "") or user.get_username())[:80]
-            reader = Reader.objects.create(
-                user=user,
-                token=f"user-{uuid.uuid4().hex}",
-                display_name=display_name,
-            )
-        return _touch_reader(reader) if reader else None
-
-    token = (
-        request.headers.get("X-Reader-Id")
-        or request.query_params.get("reader")
-        or ""
-    ).strip()
-    if not token or not (8 <= len(token) <= 64):
+    if user is None or not getattr(user, "is_authenticated", False):
         return None
-
-    reader = Reader.objects.filter(token=token, user__isnull=True).first()
-    if reader is None:
-        if not create:
-            return None
-        reader, _ = Reader.objects.get_or_create(token=token, defaults={"user": None})
-
-    return _touch_reader(reader)
+    reader = Reader.objects.filter(user=user).first()
+    if reader is None and create:
+        display_name = (getattr(user, "first_name", "") or user.get_username())[:80]
+        reader = Reader.objects.create(
+            user=user,
+            token=f"user-{uuid.uuid4().hex}",
+            display_name=display_name,
+        )
+    return _touch_reader(reader) if reader else None
 
 
 def merge_reader(user, anonymous_token: str | None) -> Reader | None:
@@ -123,7 +110,13 @@ def merge_reader(user, anonymous_token: str | None) -> Reader | None:
 
 def user_payload(user) -> dict:
     name = user.first_name or user.get_username()
-    return {"id": user.id, "name": name, "email": user.email or user.get_username()}
+    avatar = Reader.objects.filter(user=user).values_list("avatar", flat=True).first() or ""
+    return {
+        "id": user.id,
+        "name": name,
+        "email": user.email or user.get_username(),
+        "avatar": avatar,
+    }
 
 
 def auth_payload(user) -> dict:
@@ -171,7 +164,7 @@ def register(request):
         return Response({"detail": "Format email tidak valid."}, status=status.HTTP_400_BAD_REQUEST)
     if User.objects.filter(username__iexact=email).exists():
         return Response(
-            {"detail": "Email ini sudah terdaftar. Coba masuk aja."},
+            {"detail": "Email ini sudah terdaftar. Silakan masuk."},
             status=status.HTTP_400_BAD_REQUEST,
         )
     try:
@@ -212,6 +205,114 @@ def login(request):
 
     merge_reader(user, request.headers.get("X-Reader-Id"))
     return Response(auth_payload(user))
+
+
+@api_view(["POST"])
+@authentication_classes([])
+def google_login(request):
+    if not settings.GOOGLE_CLIENT_ID:
+        return Response(
+            {"detail": "Login Google belum dikonfigurasi."},
+            status=status.HTTP_503_SERVICE_UNAVAILABLE,
+        )
+
+    credential = (request.data.get("credential") or "").strip()
+    if not credential:
+        return Response({"detail": "Token Google wajib dikirim."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        response = requests.get(
+            "https://oauth2.googleapis.com/tokeninfo",
+            params={"id_token": credential},
+            timeout=10,
+        )
+    except requests.RequestException:
+        return Response(
+            {"detail": "Gagal memverifikasi token Google."},
+            status=status.HTTP_502_BAD_GATEWAY,
+        )
+
+    if response.status_code != 200:
+        return Response(
+            {"detail": "Token Google tidak valid."}, status=status.HTTP_401_UNAUTHORIZED
+        )
+
+    payload = response.json()
+    if payload.get("aud") != settings.GOOGLE_CLIENT_ID:
+        return Response(
+            {"detail": "Token Google bukan untuk aplikasi ini."},
+            status=status.HTTP_401_UNAUTHORIZED,
+        )
+    if str(payload.get("email_verified", "")).lower() != "true":
+        return Response(
+            {"detail": "Email Google belum terverifikasi."},
+            status=status.HTTP_401_UNAUTHORIZED,
+        )
+
+    email = (payload.get("email") or "").strip().lower()
+    if not email:
+        return Response({"detail": "Email Google tidak dapat dibaca."}, status=status.HTTP_400_BAD_REQUEST)
+
+    name = (payload.get("name") or payload.get("given_name") or email.split("@")[0])[:150]
+    user = User.objects.filter(email__iexact=email).first() or User.objects.filter(
+        username__iexact=email
+    ).first()
+
+    if user is None:
+        user = User.objects.create_user(username=email, email=email, first_name=name)
+        user.set_unusable_password()
+        user.save(update_fields=["password"])
+    else:
+        changed = []
+        if not user.email:
+            user.email = email
+            changed.append("email")
+        if not user.first_name:
+            user.first_name = name
+            changed.append("first_name")
+        if changed:
+            user.save(update_fields=changed)
+
+    merge_reader(user, request.headers.get("X-Reader-Id"))
+    return Response(auth_payload(user))
+
+
+@api_view(["GET", "PATCH"])
+@permission_classes([IsAuthenticated])
+def profile(request):
+    reader = get_reader(request)
+    if reader is None:
+        return Response({"detail": "Reader tidak dikenal."}, status=status.HTTP_400_BAD_REQUEST)
+
+    if request.method == "PATCH":
+        if "name" in request.data:
+            name = (request.data.get("name") or "").strip()
+            if len(name) < 2:
+                return Response(
+                    {"detail": "Nama minimal 2 karakter."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            request.user.first_name = name[:150]
+            request.user.save(update_fields=["first_name"])
+            reader.display_name = name[:80]
+
+        if "avatar" in request.data:
+            avatar = request.data.get("avatar") or ""
+            if avatar and not (avatar.startswith("data:image/") and ";base64," in avatar):
+                return Response(
+                    {"detail": "Format avatar tidak didukung."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            if len(avatar) > 700_000:
+                return Response(
+                    {"detail": "Avatar terlalu besar. Maksimal 500 KB."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            reader.avatar = avatar
+
+        reader.save(update_fields=["display_name", "avatar"])
+
+    return Response({"user": user_payload(request.user)})
 
 
 @api_view(["POST"])
@@ -389,6 +490,7 @@ def chapter_detail(request, chapter_slug: str):
 # Library
 # ---------------------------------------------------------------------------
 @api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def library(request):
     reader = get_reader(request)
     if not reader:
@@ -406,6 +508,7 @@ def library(request):
 
 
 @api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def favorites(request):
     reader = get_reader(request, create=False)
     if not reader:
@@ -416,11 +519,12 @@ def favorites(request):
 
 
 @api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def toggle_favorite(request):
     reader = get_reader(request)
     if not reader:
         return Response(
-            {"detail": "Header X-Reader-Id wajib dikirim."}, status=status.HTTP_400_BAD_REQUEST
+            {"detail": "Silakan masuk terlebih dahulu."}, status=status.HTTP_401_UNAUTHORIZED
         )
 
     slug = (request.data.get("comic_slug") or "").strip()
@@ -454,6 +558,7 @@ def toggle_favorite(request):
 
 
 @api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
 def remove_favorite(request, slug: str):
     reader = get_reader(request)
     if not reader:
@@ -463,11 +568,12 @@ def remove_favorite(request, slug: str):
 
 
 @api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def save_history(request):
     reader = get_reader(request)
     if not reader:
         return Response(
-            {"detail": "Header X-Reader-Id wajib dikirim."}, status=status.HTTP_400_BAD_REQUEST
+            {"detail": "Silakan masuk terlebih dahulu."}, status=status.HTTP_401_UNAUTHORIZED
         )
 
     slug = (request.data.get("comic_slug") or "").strip()
@@ -495,6 +601,7 @@ def save_history(request):
 
 
 @api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
 def remove_history(request, slug: str):
     reader = get_reader(request)
     if not reader:
@@ -542,6 +649,7 @@ def compute_streak(dates) -> int:
 
 
 @api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def stats(request):
     reader = get_reader(request, create=False)
     if not reader:

@@ -37,9 +37,9 @@ export function AnimeDetailPage() {
       <div className="container py-16">
         <EmptyState
           icon={Clapperboard}
-          title={t("Anime gak ketemu")}
+          title={t("Anime tidak ditemukan")}
           description={error ?? t("Data anime ini belum tersedia di sumber.")}
-          actionLabel={t("Balik ke anime")}
+          actionLabel={t("Kembali ke anime")}
           actionHref="/anime"
         />
       </div>
@@ -188,7 +188,7 @@ export function AnimeDetailPage() {
                 </div>
                 <Badge variant="outline">
                   <Clock3 className="h-3 w-3" />
-                  {data.duration || "—"}
+                  {data.duration || "-"}
                 </Badge>
               </div>
 
@@ -196,7 +196,7 @@ export function AnimeDetailPage() {
                 <div className="flex flex-col items-center gap-2 py-12 text-center">
                   <Clapperboard className="h-6 w-6 text-muted-foreground" />
                   <p className="text-sm font-semibold">{t("Belum ada episode")}</p>
-                  <p className="text-xs text-muted-foreground">{t("Coba cek lagi nanti.")}</p>
+                  <p className="text-xs text-muted-foreground">{t("Silakan periksa kembali nanti.")}</p>
                 </div>
               ) : (
                 <div className="mt-2 divide-y divide-border/60">
@@ -229,18 +229,18 @@ export function AnimeDetailPage() {
             <div className="rounded-[5px] border border-border/60 bg-card p-5">
               <h3 className="headline text-lg">{t("Informasi")}</h3>
               <dl className="mt-4 space-y-3 text-sm">
-                <InfoRow label={t("Judul Jepang")} value={data.japanese || "—"} />
-                <InfoRow label={t("Studio")} value={data.studios || "—"} />
-                <InfoRow label={t("Produser")} value={data.producers || "—"} />
-                <InfoRow label={t("Tipe")} value={data.type || "—"} />
-                <InfoRow label={t("Status")} value={data.status || "—"} />
-                <InfoRow label={t("Tayang")} value={data.aired || "—"} />
+                <InfoRow label={t("Judul Jepang")} value={data.japanese || "-"} />
+                <InfoRow label={t("Studio")} value={data.studios || "-"} />
+                <InfoRow label={t("Produser")} value={data.producers || "-"} />
+                <InfoRow label={t("Tipe")} value={data.type || "-"} />
+                <InfoRow label={t("Status")} value={data.status || "-"} />
+                <InfoRow label={t("Tayang")} value={data.aired || "-"} />
               </dl>
             </div>
             <div className="rounded-[5px] border border-dashed border-border bg-card/50 p-5">
               <p className="text-sm font-bold">{t("Catatan")}</p>
               <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
-                {t("Video di-embed dari server sumber. Kalau player gak muncul, buka server alternatif di halaman episode.")}
+                {t("Video disematkan dari server sumber. Jika pemutar tidak muncul, buka server alternatif di halaman episode.")}
               </p>
             </div>
           </aside>

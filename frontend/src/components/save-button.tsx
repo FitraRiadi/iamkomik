@@ -1,6 +1,9 @@
 import { Bookmark, BookmarkCheck } from "lucide-react"
+import { useLocation, useNavigate } from "react-router-dom"
+import { toast } from "sonner"
 
 import { useLibrary } from "@/hooks/use-library"
+import { useAuth } from "@/lib/auth"
 import { useI18n } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
 import type { ComicCard } from "@/lib/types"
@@ -13,7 +16,10 @@ interface SaveButtonProps {
 
 export function SaveButton({ comic, className, compact = false }: SaveButtonProps) {
   const { isSaved, toggleFavorite } = useLibrary()
+  const { user } = useAuth()
   const { t } = useI18n()
+  const navigate = useNavigate()
+  const location = useLocation()
   const saved = isSaved(comic.slug)
 
   return (
@@ -23,6 +29,11 @@ export function SaveButton({ comic, className, compact = false }: SaveButtonProp
       onClick={(event) => {
         event.preventDefault()
         event.stopPropagation()
+        if (!user) {
+          toast(t("Silakan masuk untuk menyimpan komik."))
+          navigate(`/masuk?next=${encodeURIComponent(location.pathname + location.search)}`)
+          return
+        }
         void toggleFavorite({
           slug: comic.slug,
           title: comic.title,

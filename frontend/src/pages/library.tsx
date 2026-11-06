@@ -1,16 +1,6 @@
 import { Link } from "react-router-dom"
 import { motion } from "framer-motion"
-import {
-  ArrowRight,
-  Bookmark,
-  BookOpen,
-  Clock3,
-  Copy,
-  History,
-  Sparkles,
-  Trash2,
-} from "lucide-react"
-import { toast } from "sonner"
+import { ArrowRight, Bookmark, BookOpen, Clock3, History, Trash2 } from "lucide-react"
 
 import { ComicCard } from "@/components/comic-card"
 import { EmptyState } from "@/components/empty-state"
@@ -24,21 +14,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useLibrary } from "@/hooks/use-library"
 import { formatRelative } from "@/lib/format"
 import { useI18n } from "@/lib/i18n"
-import { getReaderId } from "@/lib/reader"
 import { cn } from "@/lib/utils"
 
 export function LibraryPage() {
   const { favorites, history, loading, removeHistory } = useLibrary()
   const { t, language } = useI18n()
-
-  const copyId = async () => {
-    try {
-      await navigator.clipboard.writeText(getReaderId())
-      toast.success(t("ID perangkat disalin"))
-    } catch {
-      toast.error(t("Gagal menyalin ID"))
-    }
-  }
 
   return (
     <PageTransition>
@@ -51,10 +31,10 @@ export function LibraryPage() {
             <div>
               <p className="eyebrow">{t("Koleksi pribadi")}</p>
               <h1 className="headline mt-2 text-4xl text-balance sm:text-5xl">
-                {t("Bacaan lo, rapi di sini.")}
+                {t("Bacaan Anda, rapi di sini.")}
               </h1>
               <p className="mt-2 max-w-lg text-sm leading-relaxed text-muted-foreground">
-                {t("Semua komik yang lo simpan dan riwayat baca tersimpan otomatis di perangkat ini. Gak perlu bikin akun.")}
+                {t("Semua komik yang Anda simpan dan riwayat baca tersimpan otomatis di akun Anda.")}
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -66,10 +46,6 @@ export function LibraryPage() {
                 <History className="h-3 w-3" />
                 {t("{count} riwayat", { count: history.length })}
               </Badge>
-              <Button variant="outline" size="sm" onClick={() => void copyId()}>
-                <Copy className="h-3.5 w-3.5" />
-                {t("Salin ID")}
-              </Button>
             </div>
           </div>
         </section>
@@ -108,7 +84,7 @@ export function LibraryPage() {
               <EmptyState
                 icon={Bookmark}
                 title={t("Belum ada komik yang disimpan")}
-                description={t("Tekan tombol Simpan di card komik mana pun, nanti muncul di sini.")}
+                description={t("Tekan tombol Simpan pada kartu komik mana pun, maka komik akan muncul di sini.")}
                 actionLabel={t("Mulai jelajah")}
                 actionHref="/jelajah"
               />
@@ -141,7 +117,7 @@ export function LibraryPage() {
               <EmptyState
                 icon={BookOpen}
                 title={t("Belum ada riwayat baca")}
-                description={t("Buka chapter pertama dari komik favorit lo, riwayatnya bakal otomatis muncul di sini.")}
+                description={t("Buka chapter pertama dari komik favorit Anda; riwayatnya akan muncul di sini secara otomatis.")}
                 actionLabel={t("Cari komik")}
                 actionHref="/jelajah"
               />
@@ -182,7 +158,7 @@ export function LibraryPage() {
                             {item.chapter_name || t("Chapter")}
                           </Badge>
                           <span className="absolute bottom-2.5 right-2.5 inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-[10px] font-bold text-primary-foreground opacity-0 transition group-hover:opacity-100">
-                            {t("Lanjut")}
+                            {t("Lanjutkan")}
                             <ArrowRight className="h-3 w-3" />
                           </span>
                         </div>
@@ -212,29 +188,18 @@ export function LibraryPage() {
         </Tabs>
 
         <div className="mt-12 flex flex-col items-start justify-between gap-4 rounded-[5px] border border-dashed border-border bg-card/50 p-6 sm:flex-row sm:items-center">
-          <div className="flex items-center gap-3">
-            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-accent text-accent-foreground">
-              <Sparkles className="h-5 w-5" />
-            </span>
-            <div>
-              <p className="text-sm font-bold">{t("Data lo aman di perangkat ini")}</p>
-              <p className="text-xs text-muted-foreground">
-                {t("Simpan ID perangkat buat mindahin koleksi ke browser lain.")}
-              </p>
-            </div>
+          <div>
+            <p className="text-sm font-bold">{t("Koleksi tersimpan di akun Anda")}</p>
+            <p className="text-xs text-muted-foreground">
+              {t("Masuk dari perangkat lain untuk membuka koleksi dan riwayat yang sama.")}
+            </p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => void copyId()}>
-              <Copy className="h-3.5 w-3.5" />
-              {t("Salin ID")}
-            </Button>
-            <Button asChild size="sm">
-              <Link to="/dashboard">
-                {t("Lihat statistik")}
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </Button>
-          </div>
+          <Button asChild size="sm">
+            <Link to="/dashboard">
+              {t("Lihat statistik")}
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </Button>
         </div>
         </div>
       </div>

@@ -28,12 +28,12 @@ export function getErrorMessage(error: unknown): string {
     const detail = error.response?.data?.detail
     if (typeof detail === "string" && detail.trim()) return detail
     if (error.code === "ECONNABORTED") {
-      return translate(language, "Request timeout. Coba lagi ya.")
+      return translate(language, "Waktu permintaan habis. Silakan coba lagi.")
     }
     if (!error.response) {
-      return translate(language, "Gak bisa nyambung ke server. Cek backend lo masih jalan.")
+      return translate(language, "Tidak dapat terhubung ke server. Periksa apakah backend masih berjalan.")
     }
   }
   if (error instanceof Error && error.message) return error.message
-  return translate(language, "Ada yang error. Coba lagi sebentar.")
+  return translate(language, "Terjadi kesalahan. Silakan coba lagi.")
 }

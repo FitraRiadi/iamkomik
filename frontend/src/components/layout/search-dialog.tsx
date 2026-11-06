@@ -78,7 +78,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
           {query.trim().length < 2 ? (
             <div className="space-y-3 px-2 py-3">
               <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
-                {t("Coba cari")}
+                {t("Coba pencarian")}
               </p>
               <div className="flex flex-wrap gap-2">
                 {["Solo Leveling", "One Piece", "Manhwa", "Romance", "Action"].map((keyword) => (
@@ -108,19 +108,20 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
           ) : (data?.results ?? []).length > 0 ? (
             <div className="grid grid-cols-2 gap-3 p-2 sm:grid-cols-3">
               {(data?.results ?? []).slice(0, 9).map((comic, index) => (
-                <ComicCard
-                  key={comic.slug}
-                  comic={comic}
-                  index={index}
-                  showSave={false}
-                  chapterLabel={comic.chapter || t("Lihat detail")}
-                />
+                <div key={comic.slug} onClick={() => onOpenChange(false)}>
+                  <ComicCard
+                    comic={comic}
+                    index={index}
+                    showSave={false}
+                    chapterLabel={comic.chapter || t("Lihat detail")}
+                  />
+                </div>
               ))}
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2 px-4 py-10 text-center">
               <Sparkles className="h-6 w-6 text-primary" />
-              <p className="text-sm font-semibold">{t("Belum ketemu hasilnya")}</p>
+              <p className="text-sm font-semibold">{t("Hasil tidak ditemukan")}</p>
               <p className="text-xs text-muted-foreground">
                 {t("Coba kata kunci lain atau buka halaman jelajah.")}
               </p>

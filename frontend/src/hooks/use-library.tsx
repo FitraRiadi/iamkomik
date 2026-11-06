@@ -37,6 +37,12 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = React.useState(true)
 
   const refresh = React.useCallback(async () => {
+    if (!user) {
+      setFavorites([])
+      setHistory([])
+      setLoading(false)
+      return
+    }
     try {
       const response = await api.get<LibraryPayload>("/library/")
       setFavorites(response.data.favorites ?? [])
@@ -46,10 +52,10 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [user])
 
   React.useEffect(() => {
-    setLoading(true)
+    setLoading(Boolean(user))
     void refresh()
   }, [refresh, user?.id])
 
@@ -102,7 +108,7 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
             ? [optimistic, ...current.filter((item) => item.comic_slug !== comic.slug)]
             : current.filter((item) => item.comic_slug !== comic.slug),
         )
-        toast.error(t("Gagal update koleksi"), { description: getErrorMessage(error) })
+        toast.error(t("Gagal memperbarui koleksi"), { description: getErrorMessage(error) })
       }
     },
     [savedSlugs, t],

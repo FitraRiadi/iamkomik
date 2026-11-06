@@ -64,7 +64,7 @@ export function HomePage() {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
               </span>
-              {t("6.000+ komik · update tiap hari")}
+              {t("Katalog komik, diperbarui setiap hari")}
             </motion.div>
 
             <motion.h1
@@ -76,7 +76,7 @@ export function HomePage() {
               {t("Baca komik favorit,")}
               <br />
               <span className="relative inline-block text-primary">
-                {t("tanpa drama.")}
+                {t("dengan nyaman.")}
                 <svg
                   className="absolute -bottom-2 left-0 h-3 w-full text-primary/25"
                   viewBox="0 0 300 12"
@@ -99,7 +99,7 @@ export function HomePage() {
               transition={{ duration: 0.5, delay: 0.12 }}
               className="mt-5 max-w-lg text-[15px] leading-relaxed text-muted-foreground"
             >
-              {t("Ribuan judul dari berbagai sumber, dikumpulin jadi satu tampilan yang rapi. Simpan yang lo suka, lanjutin bacaan kapan aja.")}
+              {t("Ribuan judul dari berbagai sumber dalam satu tampilan yang rapi. Simpan judul favorit dan lanjutkan bacaan kapan saja.")}
             </motion.p>
 
             <motion.form
@@ -113,7 +113,7 @@ export function HomePage() {
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder={t("Mau baca apa hari ini?")}
+                placeholder={t("Ingin membaca apa hari ini?")}
                 className="h-11 w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground/80"
               />
               <Button type="submit" size="sm" className="h-11 shrink-0 px-5">
@@ -162,9 +162,9 @@ export function HomePage() {
 
         <section className="py-10">
           <SectionHeading
-            eyebrow={t("Lagi naik daun")}
-            title={t("Yang ramai dibaca minggu ini")}
-            description={t("Pilihan dari daftar trending — biasanya yang paling sering update.")}
+            eyebrow={t("Sedang populer")}
+            title={t("Yang banyak dibaca minggu ini")}
+            description={t("Pilihan dari daftar trending, biasanya yang paling sering diperbarui.")}
             actionLabel={t("Lihat semua")}
             actionHref="/jelajah"
           />
@@ -208,9 +208,9 @@ export function HomePage() {
 
         <section className="py-8">
           <SectionHeading
-            eyebrow={t("Baru update")}
-            title={t("Chapter baru, jangan sampai kelewatan")}
-            description={t("Diurutkan dari yang paling baru di-update oleh sumbernya.")}
+            eyebrow={t("Baru diperbarui")}
+            title={t("Chapter baru, jangan sampai terlewat")}
+            description={t("Diurutkan dari yang paling baru diperbarui oleh sumber.")}
             actionLabel={t("Jelajah semua")}
             actionHref="/jelajah"
           />
@@ -233,13 +233,13 @@ export function HomePage() {
               <div className="max-w-xl">
                 <Badge variant="glass" className="border-white/20 bg-white/15 text-white">
                   <BarChart3 className="h-3 w-3" />
-                  {t("Reading insights")}
+                  {t("Ringkasan membaca")}
                 </Badge>
                 <h2 className="headline mt-4 text-3xl text-balance sm:text-4xl">
-                  {t("Lo udah baca berapa chapter minggu ini?")}
+                  {t("Sudah berapa chapter yang Anda baca minggu ini?")}
                 </h2>
                 <p className="mt-2 max-w-md text-sm leading-relaxed text-white/80">
-                  {t("Semua aktivitas baca lo tercatat otomatis. Cek statistik, streak, dan genre favorit lo di dashboard.")}
+                  {t("Semua aktivitas membaca Anda tercatat otomatis. Periksa statistik, rentetan, dan genre favorit Anda di dashboard.")}
                 </p>
               </div>
               <Button
@@ -363,7 +363,7 @@ function HeroCollage({ comics, loading }: { comics: ComicCardType[]; loading: bo
         </span>
         <div>
           <p className="text-[10px] font-medium text-muted-foreground">{t("Update hari ini")}</p>
-          <p className="text-xs font-bold">{t("40+ chapter baru")}</p>
+          <p className="text-xs font-bold">{t("Chapter baru")}</p>
         </div>
       </motion.div>
     </div>
@@ -386,8 +386,8 @@ function ContinueReading({
   return (
     <section className="py-4">
       <SectionHeading
-        eyebrow={t("Lanjutin")}
-        title={t("Masih penasaran sama ceritanya?")}
+        eyebrow={t("Lanjutkan")}
+        title={t("Masih penasaran dengan ceritanya?")}
         actionLabel={t("Semua riwayat")}
         actionHref="/koleksi"
       />
@@ -422,7 +422,7 @@ function ContinueReading({
                   {formatRelative(item.updated_at, language)}
                 </p>
                 <span className="mt-2 inline-flex items-center gap-1 text-[10px] font-bold text-primary">
-                  {t("Lanjut baca")}
+                  {t("Lanjutkan membaca")}
                   <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
                 </span>
               </div>
@@ -492,8 +492,8 @@ function EditorCarousel({ comics }: { comics: ComicCardType[] }) {
                   {comic.title}
                 </h2>
                 <p className="mt-2 max-w-md text-sm leading-relaxed text-white/70">
-                  {comic.chapter ? t("{chapter} baru aja rilis. ", { chapter: comic.chapter }) : ""}
-                  {t("Buka detailnya buat lihat sinopsis, daftar chapter, dan rekomendasi serupa.")}
+                  {comic.chapter ? t("{chapter} baru saja rilis. ", { chapter: comic.chapter }) : ""}
+                  {t("Buka detailnya untuk melihat sinopsis, daftar chapter, dan rekomendasi serupa.")}
                 </p>
                 <div className="mt-6 flex flex-wrap gap-2.5">
                   <Button

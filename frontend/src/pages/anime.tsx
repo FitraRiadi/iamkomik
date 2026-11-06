@@ -74,7 +74,7 @@ export function AnimePage() {
               Anime
             </Badge>
             <h1 className="headline mt-4 text-4xl text-balance text-white sm:text-5xl">
-              {t("Anime ongoing, tamat, sampai yang lagi hype.")}
+              {t("Anime sedang tayang, tamat, hingga yang sedang populer.")}
             </h1>
             <p className="mt-2 max-w-lg text-sm leading-relaxed text-white/70">
               {t("Cari judul, lihat episode, dan tonton langsung dari sumbernya. Semua dalam satu tempat.")}
@@ -116,9 +116,9 @@ export function AnimePage() {
             ) : results.length === 0 ? (
               <EmptyState
                 icon={Search}
-                title={t("Anime gak ketemu")}
-                description={t("Coba kata kunci lain, atau kembali ke daftar ongoing.")}
-                actionLabel={t("Balik ke anime")}
+                title={t("Anime tidak ditemukan")}
+                description={t("Coba kata kunci lain, atau kembali ke daftar anime yang sedang tayang.")}
+                actionLabel={t("Kembali ke anime")}
                 actionHref="/anime"
               />
             ) : (
@@ -134,7 +134,7 @@ export function AnimePage() {
             <section className="py-10">
               <SectionHeading
                 eyebrow={t("Sedang tayang")}
-                title={t("Anime ongoing")}
+                title={t("Anime sedang tayang")}
                 description={t("Update episode terbaru dari sumber yang tersedia.")}
                 actionLabel={t("Cari anime")}
                 actionHref="/anime"
@@ -144,7 +144,7 @@ export function AnimePage() {
               ) : error ? (
                 <EmptyState
                   icon={RefreshCw}
-                  title={t("Gagal ambil data anime")}
+                  title={t("Gagal mengambil data anime")}
                   description={error}
                   actionLabel={t("Coba lagi")}
                   actionHref="/anime"
@@ -157,9 +157,9 @@ export function AnimePage() {
               ) : (data?.ongoing ?? []).length === 0 ? (
                 <EmptyState
                   icon={Sparkles}
-                  title={t("Belum ada anime ongoing")}
-                  description={t("Sumbernya lagi kosong. Coba cek lagi nanti.")}
-                  actionLabel={t("Balik ke beranda")}
+                  title={t("Belum ada anime yang sedang tayang")}
+                  description={t("Sumber sedang kosong. Silakan periksa kembali nanti.")}
+                  actionLabel={t("Kembali ke beranda")}
                   actionHref="/"
                 />
               ) : (
@@ -179,9 +179,9 @@ export function AnimePage() {
             {(data?.complete ?? []).length > 0 ? (
               <section className="pb-10">
                 <SectionHeading
-                  eyebrow={t("Binge watch")}
+                  eyebrow={t("Maraton")}
                   title={t("Yang sudah tamat")}
-                  description={t("Cocok buat maraton akhir pekan.")}
+                  description={t("Cocok untuk maraton akhir pekan.")}
                 />
                 <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                   {(data?.complete ?? []).map((anime, index) => (
@@ -198,9 +198,9 @@ export function AnimePage() {
                     <Clapperboard className="h-5 w-5" />
                   </span>
                   <div>
-                    <p className="text-sm font-bold">{t("Anime di sini pakai sumber Otakudesu")}</p>
+                    <p className="text-sm font-bold">{t("Anime di sini menggunakan sumber Otakudesu.")}</p>
                     <p className="text-xs text-muted-foreground">
-                      {t("Streaming dan download link disediakan langsung oleh API.")}
+                      {t("Tautan streaming dan unduhan disediakan langsung oleh API.")}
                     </p>
                   </div>
                 </div>

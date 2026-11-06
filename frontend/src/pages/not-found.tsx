@@ -19,15 +19,15 @@ export function NotFoundPage() {
             <Ghost className="h-7 w-7" />
           </span>
         </div>
-        <h1 className="headline mt-2 text-3xl">{t("Halaman ini hilang entah ke mana.")}</h1>
+        <h1 className="headline mt-2 text-3xl">{t("Halaman ini tidak ditemukan.")}</h1>
         <p className="mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
-          {t("Mungkin link-nya salah, atau chapter yang lo cari udah dipindahin. Balik dulu aja, masih banyak komik lain.")}
+          {t("Tautan mungkin salah, atau chapter yang Anda cari telah dipindahkan. Kembali ke beranda; masih banyak komik lain.")}
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <Button asChild>
             <Link to="/">
               <ArrowLeft className="h-4 w-4" />
-              {t("Balik ke beranda")}
+              {t("Kembali ke beranda")}
             </Link>
           </Button>
           <Button asChild variant="outline">

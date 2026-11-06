@@ -15,6 +15,7 @@ class Reader(models.Model):
     )
     token = models.CharField(max_length=64, unique=True)
     display_name = models.CharField(max_length=80, blank=True, default="")
+    avatar = models.TextField(blank=True, default="")  # shortcut: data URL, pindah ke object storage kalau avatar membesar
     created_at = models.DateTimeField(auto_now_add=True)
     last_seen_at = models.DateTimeField(default=timezone.now)
 

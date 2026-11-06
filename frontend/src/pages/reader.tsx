@@ -166,10 +166,10 @@ export function ReaderPage() {
           <span className="grid h-14 w-14 place-items-center rounded-2xl bg-white/5">
             <ImageOff className="h-6 w-6 text-zinc-500" />
           </span>
-          <h1 className="font-display text-xl font-bold">{t("Chapter gak bisa dibuka")}</h1>
+          <h1 className="font-display text-xl font-bold">{t("Chapter tidak dapat dibuka")}</h1>
           <p className="text-sm text-zinc-500">{error}</p>
           <Button asChild className="mt-2">
-            <Link to={`/komik/${encodeURIComponent(slug)}`}>{t("Balik ke detail komik")}</Link>
+            <Link to={`/komik/${encodeURIComponent(slug)}`}>{t("Kembali ke detail komik")}</Link>
           </Button>
         </div>
       ) : chapter ? (
@@ -191,7 +191,7 @@ export function ReaderPage() {
                     {chapter.chapter_title}
                   </p>
                   <p className="mt-0.5 text-xs text-zinc-500">
-                    {t("Progres lo otomatis kesimpan. {percent}% halaman kebaca.", {
+                    {t("Progres Anda tersimpan otomatis. {percent}% halaman telah dibaca.", {
                       percent: progress.toFixed(0),
                     })}
                   </p>
@@ -220,7 +220,7 @@ export function ReaderPage() {
               {chapters.length > 0 ? (
                 <div className="mt-5 border-t border-white/10 pt-4">
                   <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
-                    {t("Lompat ke chapter")}
+                    {t("Pindah ke chapter")}
                   </p>
                   <div className="no-scrollbar flex gap-1.5 overflow-x-auto pb-1">
                     {chapters.slice(0, 40).map((item) => (
@@ -245,7 +245,7 @@ export function ReaderPage() {
 
             <div className="mt-8 flex items-center justify-center gap-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-600">
               <span className="h-px w-10 bg-white/10" />
-              {t("Gunakan ← → buat pindah chapter")}
+              {t("Gunakan tombol ← → untuk berpindah chapter")}
               <span className="h-px w-10 bg-white/10" />
             </div>
           </div>

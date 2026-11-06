@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom"
 import * as React from "react"
 
 import { AppShell } from "@/components/layout/app-shell"
+import { RequireAuth } from "@/components/require-auth"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -18,6 +19,7 @@ import { HomePage } from "@/pages/home"
 import { LibraryPage } from "@/pages/library"
 import { LoginPage } from "@/pages/login"
 import { NotFoundPage } from "@/pages/not-found"
+import { ProfilePage } from "@/pages/profile"
 import { ReaderPage } from "@/pages/reader"
 import { RegisterPage } from "@/pages/register"
 
@@ -48,8 +50,9 @@ export default function App() {
                     <Route path="/jelajah" element={<ExplorePage />} />
                     <Route path="/komik/:slug" element={<ComicDetailPage />} />
                     <Route path="/baca/:slug/:chapterSlug" element={<ReaderPage />} />
-                    <Route path="/koleksi" element={<LibraryPage />} />
-                    <Route path="/dashboard" element={<DashboardPage />} />
+                    <Route path="/koleksi" element={<RequireAuth><LibraryPage /></RequireAuth>} />
+                    <Route path="/dashboard" element={<RequireAuth><DashboardPage /></RequireAuth>} />
+                    <Route path="/profil" element={<RequireAuth><ProfilePage /></RequireAuth>} />
                     <Route path="/masuk" element={<LoginPage />} />
                     <Route path="/daftar" element={<RegisterPage />} />
                     <Route path="/anime" element={<AnimePage />} />

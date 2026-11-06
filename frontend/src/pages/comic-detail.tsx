@@ -69,9 +69,9 @@ export function ComicDetailPage() {
       <div className="container py-16">
         <EmptyState
           icon={BookOpen}
-          title={t("Komik gak ketemu")}
-          description={error ?? t("Data komik ini belum tersedia di sumbernya. Coba judul lain aja.")}
-          actionLabel={t("Balik ke jelajah")}
+          title={t("Komik tidak ditemukan")}
+          description={error ?? t("Data komik ini belum tersedia di sumber. Silakan coba judul lain.")}
+          actionLabel={t("Kembali ke jelajah")}
           actionHref="/jelajah"
         />
       </div>
@@ -214,8 +214,8 @@ export function ComicDetailPage() {
                     <Link to={`/baca/${encodeURIComponent(data.slug)}/${encodeURIComponent(readTarget)}`}>
                       <Play className="h-4 w-4" />
                       {progress
-                        ? t("Lanjut {chapter}", { chapter: progress.chapter_name })
-                        : t("Mulai baca")}
+                        ? t("Lanjutkan {chapter}", { chapter: progress.chapter_name })
+                        : t("Mulai membaca")}
                     </Link>
                   </Button>
                 ) : null}
@@ -241,7 +241,7 @@ export function ComicDetailPage() {
                 <div>
                   <h2 className="headline text-xl">{t("Daftar chapter")}</h2>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    {t("{count} chapter · Klik buat mulai baca", { count: data.chapters.length })}
+                    {t("{count} chapter · Klik untuk mulai membaca", { count: data.chapters.length })}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -269,7 +269,7 @@ export function ComicDetailPage() {
               {visibleChapters.length === 0 ? (
                 <div className="flex flex-col items-center gap-2 py-12 text-center">
                   <ListFilter className="h-6 w-6 text-muted-foreground" />
-                  <p className="text-sm font-semibold">{t("Chapter gak ketemu")}</p>
+                  <p className="text-sm font-semibold">{t("Chapter tidak ditemukan")}</p>
                   <p className="text-xs text-muted-foreground">{t("Coba kata kunci lain.")}</p>
                 </div>
               ) : (
@@ -316,7 +316,7 @@ export function ComicDetailPage() {
             <div className="rounded-[5px] border border-border/60 bg-card p-5">
               <h3 className="headline text-lg">{t("Info komik")}</h3>
               <dl className="mt-4 space-y-3 text-sm">
-                <InfoRow icon={Layers} label={t("Tipe")} value={data.type || "—"} />
+                <InfoRow icon={Layers} label={t("Tipe")} value={data.type || "-"} />
                 <InfoRow
                   icon={BookOpen}
                   label={t("Total chapter")}
@@ -325,10 +325,10 @@ export function ComicDetailPage() {
                 <InfoRow
                   icon={CalendarDays}
                   label={t("Update terakhir")}
-                  value={data.latest_chapter?.date || "—"}
+                  value={data.latest_chapter?.date || "-"}
                 />
-                <InfoRow icon={UserRound} label={t("Author")} value={data.author || "—"} />
-                <InfoRow icon={Sparkles} label={t("Status")} value={data.status || "—"} />
+                <InfoRow icon={UserRound} label={t("Author")} value={data.author || "-"} />
+                <InfoRow icon={Sparkles} label={t("Status")} value={data.status || "-"} />
               </dl>
             </div>
 
@@ -341,11 +341,11 @@ export function ComicDetailPage() {
                   {progress.chapter_name}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {t("Lanjutin dari tempat lo berhenti.")}
+                  {t("Lanjutkan dari bagian terakhir yang Anda baca.")}
                 </p>
                 <Button asChild size="sm" className="mt-4 w-full">
                   <Link to={`/baca/${encodeURIComponent(data.slug)}/${encodeURIComponent(progress.chapter_slug)}`}>
-                    {t("Lanjut baca")}
+                    {t("Lanjutkan membaca")}
                     <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
                 </Button>
@@ -353,9 +353,9 @@ export function ComicDetailPage() {
             ) : null}
 
             <div className="rounded-[5px] border border-dashed border-border bg-card/50 p-5">
-              <p className="text-sm font-bold">{t("Tips baca")}</p>
+              <p className="text-sm font-bold">{t("Tips membaca")}</p>
               <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
-                {t("Semua chapter yang lo buka otomatis tersimpan ke riwayat. Gak perlu takut kehilangan posisi baca.")}
+                {t("Semua chapter yang Anda buka tersimpan otomatis ke riwayat. Posisi baca tidak akan hilang.")}
               </p>
             </div>
           </aside>
@@ -364,8 +364,8 @@ export function ComicDetailPage() {
         {data.similar.length > 0 ? (
           <section className="mt-12">
             <SectionHeading
-              eyebrow={t("Mirip gini")}
-              title={t("Kalau suka yang ini, coba juga")}
+              eyebrow={t("Rekomendasi serupa")}
+              title={t("Jika menyukai judul ini, coba juga")}
               description={t("Rekomendasi dari sumber yang sama.")}
             />
             <MasonryGrid>
@@ -380,7 +380,7 @@ export function ComicDetailPage() {
           <Button asChild variant="outline">
             <Link to="/jelajah">
               <ArrowLeft className="h-4 w-4" />
-              {t("Balik ke jelajah")}
+              {t("Kembali ke jelajah")}
             </Link>
           </Button>
         </div>

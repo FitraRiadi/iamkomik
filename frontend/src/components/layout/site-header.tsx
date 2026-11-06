@@ -5,7 +5,6 @@ import {
   ChartNoAxesColumn,
   Check,
   ChevronDown,
-  Clipboard,
   Clapperboard,
   Compass,
   Home,
@@ -14,6 +13,7 @@ import {
   LogOut,
   Moon,
   Search,
+  Settings,
   Sun,
   UserPlus,
   UserRound,
@@ -31,11 +31,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useLibrary } from "@/hooks/use-library"
 import { useAuth } from "@/lib/auth"
 import { useI18n } from "@/lib/i18n"
-import { getReaderId } from "@/lib/reader"
 import { cn } from "@/lib/utils"
 
 const navItems = [
@@ -83,20 +82,9 @@ export function SiteHeader() {
     navigate(trimmed ? `/jelajah?q=${encodeURIComponent(trimmed)}` : "/jelajah")
   }
 
-  const copyReaderId = async () => {
-    try {
-      await navigator.clipboard.writeText(getReaderId())
-      toast.success(t("ID perangkat disalin"), {
-        description: t("Bisa dipakai buat backup data koleksi lo."),
-      })
-    } catch {
-      toast.error(t("Gagal menyalin ID perangkat"))
-    }
-  }
-
   const handleLogout = async () => {
     await logout()
-    toast(t("Udah keluar dari akun."))
+    toast(t("Anda telah keluar dari akun."))
     navigate("/")
   }
 
@@ -107,9 +95,13 @@ export function SiteHeader() {
       <header className="sticky top-0 z-40 border-b border-border/60 glass">
         <div className="container flex h-[68px] items-center gap-3">
           <Link to="/" className="group flex shrink-0 items-center gap-2.5">
-            <span className="grid h-9 w-9 place-items-center rounded-[13px] bg-primary text-primary-foreground shadow-glow transition-transform group-hover:-rotate-6">
-              <span className="font-display text-[15px] font-extrabold leading-none">ik</span>
-            </span>
+            <img
+              src="/brand-logo.png"
+              alt=""
+              width={36}
+              height={36}
+              className="h-9 w-9 rounded-[13px] object-cover shadow-glow transition-transform group-hover:-rotate-6"
+            />
             <span className="hidden font-display text-[21px] font-extrabold tracking-[-0.04em] sm:block">
               iamkomik<span className="text-primary">.</span>
             </span>
@@ -190,6 +182,7 @@ export function SiteHeader() {
                   aria-label={t("Menu profil")}
                 >
                   <Avatar className="h-8 w-8">
+                    <AvatarImage src={user?.avatar || ""} alt={user?.name || t("Avatar profil")} />
                     <AvatarFallback className="bg-primary/10 font-display text-primary">
                       {initial}
                     </AvatarFallback>
@@ -203,7 +196,7 @@ export function SiteHeader() {
                   <span className="min-w-0">
                     <span className="block truncate">{user?.name || t("Pembaca IamKomik")}</span>
                     <span className="block truncate text-[10px] font-medium text-muted-foreground">
-                      {user?.email || t("Mode anonim · tersimpan lokal")}
+                      {user?.email || t("Belum masuk")}
                     </span>
                   </span>
                 </DropdownMenuLabel>
@@ -213,7 +206,7 @@ export function SiteHeader() {
                   <DropdownMenuItem asChild>
                     <Link to="/koleksi">
                       <Bookmark className="h-4 w-4" />
-                      {t("Koleksi gue")}
+                      {t("Koleksi")}
                       {savedCount > 0 ? (
                         <span className="ml-auto rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold text-accent-foreground">
                           {savedCount}
@@ -238,7 +231,7 @@ export function SiteHeader() {
                     <DropdownMenuItem asChild>
                       <Link to="/koleksi">
                         <Bookmark className="h-4 w-4" />
-                        {t("Koleksi gue")}
+                        {t("Koleksi")}
                         {savedCount > 0 ? (
                           <span className="ml-auto rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold text-accent-foreground">
                             {savedCount}
@@ -249,15 +242,20 @@ export function SiteHeader() {
                   </>
                 )}
 
+                {user ? (
+                  <DropdownMenuItem asChild>
+                    <Link to="/profil">
+                      <Settings className="h-4 w-4" />
+                      {t("Profil")}
+                    </Link>
+                  </DropdownMenuItem>
+                ) : null}
+
                 <DropdownMenuItem asChild>
                   <Link to="/dashboard">
                     <ChartNoAxesColumn className="h-4 w-4" />
                     {t("Statistik bacaan")}
                   </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => void copyReaderId()}>
-                  <Clipboard className="h-4 w-4" />
-                  {t("Salin ID perangkat")}
                 </DropdownMenuItem>
 
                 <DropdownMenuSeparator />

@@ -7,8 +7,10 @@ urlpatterns = [
     # accounts
     path("auth/register/", views.register, name="register"),
     path("auth/login/", views.login, name="login"),
+    path("auth/google/", views.google_login, name="google-login"),
     path("auth/logout/", views.logout, name="logout"),
     path("auth/me/", views.me, name="me"),
+    path("auth/profile/", views.profile, name="profile"),
     # discovery
     path("home/", views.home, name="home"),
     path("comics/trending/", views.trending, name="trending"),
