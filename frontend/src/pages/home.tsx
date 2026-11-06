@@ -248,7 +248,7 @@ export function HomePage() {
                 className="shrink-0 bg-white text-primary hover:bg-white/90"
               >
                 <Link to="/dashboard">
-                  {t("Buka dashboard")}
+                  {t("Buka statistik")}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
@@ -362,7 +362,7 @@ function HeroCollage({ comics, loading }: { comics: ComicCardType[]; loading: bo
           <TrendingUp className="h-4 w-4" />
         </span>
         <div>
-          <p className="text-[10px] font-medium text-muted-foreground">{t("Update hari ini")}</p>
+          <p className="text-[10px] font-medium text-muted-foreground">{t("Pembaruan hari ini")}</p>
           <p className="text-xs font-bold">{t("Chapter baru")}</p>
         </div>
       </motion.div>
@@ -514,7 +514,7 @@ function EditorCarousel({ comics }: { comics: ComicCardType[] }) {
                   >
                     <Link to={`/komik/${encodeURIComponent(comic.slug)}`}>
                       <Bookmark className="h-4 w-4" />
-                      {t("Simpan dulu")}
+                      {t("Simpan untuk nanti")}
                     </Link>
                   </Button>
                 </div>

@@ -272,7 +272,7 @@ export function DashboardPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <Title className="font-display text-lg font-bold">{t("Paling sering dibaca")}</Title>
-                    <Text className="text-xs text-muted-foreground">{t("Top 5 judul.")}</Text>
+                    <Text className="text-xs text-muted-foreground">{t("5 judul teratas.")}</Text>
                   </div>
                   <Target className="h-5 w-5 text-primary" />
                 </div>

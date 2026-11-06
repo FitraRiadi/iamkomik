@@ -108,7 +108,7 @@ export function AnimePage() {
                 </h2>
               </div>
               <Button variant="ghost" size="sm" onClick={() => { setQuery(""); setDebounced("") }}>
-                {t("Reset")}
+                {t("Atur ulang")}
               </Button>
             </div>
             {search.loading ? (
@@ -135,7 +135,7 @@ export function AnimePage() {
               <SectionHeading
                 eyebrow={t("Sedang tayang")}
                 title={t("Anime sedang tayang")}
-                description={t("Update episode terbaru dari sumber yang tersedia.")}
+                description={t("Episode terbaru dari sumber yang tersedia.")}
                 actionLabel={t("Cari anime")}
                 actionHref="/anime"
               />

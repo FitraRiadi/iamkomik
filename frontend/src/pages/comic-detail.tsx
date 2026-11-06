@@ -324,10 +324,10 @@ export function ComicDetailPage() {
                 />
                 <InfoRow
                   icon={CalendarDays}
-                  label={t("Update terakhir")}
+                  label={t("Pembaruan terakhir")}
                   value={data.latest_chapter?.date || "-"}
                 />
-                <InfoRow icon={UserRound} label={t("Author")} value={data.author || "-"} />
+                <InfoRow icon={UserRound} label={t("Penulis")} value={data.author || "-"} />
                 <InfoRow icon={Sparkles} label={t("Status")} value={data.status || "-"} />
               </dl>
             </div>

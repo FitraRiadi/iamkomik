@@ -192,7 +192,7 @@ export function ExplorePage() {
             <p className="mt-1 text-sm text-muted-foreground">
               {query || genre ? (
                 <button type="button" onClick={clearFilters} className="font-semibold text-primary hover:underline">
-                  {t("Reset filter")}
+                  {t("Atur ulang filter")}
                 </button>
               ) : (
                 t("Paling banyak dibuka pembaca IamKomik.")
