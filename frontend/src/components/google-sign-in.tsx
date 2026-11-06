@@ -75,12 +75,16 @@ export function GoogleSignIn({
         if (cancelled || !container.current || !window.google?.accounts?.id) return
         window.google.accounts.id.initialize({ client_id: clientId, callback: handleCredential })
         container.current.innerHTML = ""
+        const width = Math.max(
+          200,
+          Math.min(360, Math.floor(container.current.clientWidth) - 20),
+        )
         window.google.accounts.id.renderButton(container.current, {
           theme: "outline",
           size: "large",
           text: "continue_with",
           shape: "pill",
-          width: 360,
+          width,
         })
       })
       .catch(() => {
@@ -94,5 +98,10 @@ export function GoogleSignIn({
 
   if (!clientId) return null
 
-  return <div ref={container} className="flex min-h-10 justify-center [&>div]:max-w-full" />
+  return (
+    <div
+      ref={container}
+      className="flex min-h-10 w-full min-w-0 justify-center [&>div]:max-w-full [&_iframe]:max-w-full"
+    />
+  )
 }

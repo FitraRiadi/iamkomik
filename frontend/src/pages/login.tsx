@@ -114,7 +114,7 @@ export function LoginPage() {
             </div>
           </div>
 
-          <div className="p-6 sm:p-10">
+          <div className="min-w-0 p-6 sm:p-10">
             <p className="eyebrow">{t("Masuk")}</p>
             <h1 className="headline mt-2 text-3xl text-balance sm:text-4xl">
               {t("Selamat datang kembali")}
