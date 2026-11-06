@@ -10,19 +10,21 @@ import { cn } from "@/lib/utils"
 export function AppShell({ children }: { children: React.ReactNode }) {
   const location = useLocation()
   const immersive = location.pathname.startsWith("/baca/")
+  const authPage = location.pathname === "/masuk" || location.pathname === "/daftar"
+  const hideMobileNav = immersive || authPage
 
   return (
     <div
       className={cn(
         "flex min-h-dvh flex-col",
-        immersive ? "" : "pb-[calc(5.9rem+env(safe-area-inset-bottom))] md:pb-0",
+        hideMobileNav ? "" : "pb-[calc(5.9rem+env(safe-area-inset-bottom))] md:pb-0",
       )}
     >
       {!immersive ? <SiteHeader /> : null}
       {!immersive ? <OfflineBanner /> : null}
       <main className="flex-1">{children}</main>
       {!immersive ? <SiteFooter /> : null}
-      {!immersive ? <MobileNav /> : null}
+      {!hideMobileNav ? <MobileNav /> : null}
       {!immersive ? <SitePrompts /> : null}
     </div>
   )
