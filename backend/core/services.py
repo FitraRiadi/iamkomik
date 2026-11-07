@@ -47,7 +47,13 @@ def api_get(path: str, params: dict | None = None, ttl: int | None = None):
         raise UpstreamError("Tidak bisa menghubungi sumber data.", 502) from exc
 
     if response.status_code >= 400:
-        logger.warning("Upstream %s -> %s", url, response.status_code)
+        logger.warning(
+            "Upstream %s -> %s cf=%s body=%s",
+            url,
+            response.status_code,
+            response.headers.get("cf-mitigated"),
+            response.text[:200].replace("\n", " "),
+        )
         raise UpstreamError(
             "Sumber data sedang tidak tersedia untuk permintaan ini.", response.status_code
         )
