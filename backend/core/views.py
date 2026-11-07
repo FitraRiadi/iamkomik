@@ -3,6 +3,7 @@ from __future__ import annotations
 import uuid
 from collections import Counter
 from datetime import timedelta
+from urllib.parse import unquote
 from xml.sax.saxutils import escape
 
 import requests
@@ -12,7 +13,8 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db import transaction
-from django.http import HttpResponse
+from django.http import HttpResponse, QueryDict
+from django.urls import Resolver404, resolve
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.authtoken.models import Token
@@ -139,6 +141,8 @@ def auth_payload(user) -> dict:
 
 
 def log_event(reader, event_type: str, **kwargs):
+    if services.prefetched_data_incomplete():
+        return
     try:
         ActivityEvent.objects.create(reader=reader, event_type=event_type, **kwargs)
     except Exception:  # noqa: BLE001 - logging tidak boleh bikin request gagal
@@ -1283,6 +1287,120 @@ def anime_server(request, server_id: str):
         return Response(services.get_anime_server(server_id))
     except services.UpstreamError as exc:
         return upstream_error(exc)
+
+
+SANKA_FALLBACK_VIEWS = {
+    "home",
+    "trending",
+    "latest",
+    "genres",
+    "genre-detail",
+    "search",
+    "comic-detail",
+    "chapter-detail",
+    "anime-home",
+    "anime-genres",
+    "anime-genre",
+    "anime-search",
+    "anime-episode",
+    "anime-server",
+    "anime-detail",
+}
+
+
+@api_view(["POST"])
+def upstream_fallback(request):
+    try:
+        content_length = int(request.META.get("CONTENT_LENGTH") or 0)
+    except ValueError:
+        content_length = 4_000_001
+    if content_length > 4_000_000:
+        return Response(
+            {"detail": "Data fallback terlalu besar."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    api_path = unquote(str(request.data.get("api_path") or "").strip())
+    query = request.data.get("query") or {}
+    raw_payloads = request.data.get("payloads") or []
+    if (
+        not api_path.startswith("/")
+        or "?" in api_path
+        or len(api_path) > 1000
+        or not isinstance(query, dict)
+        or not isinstance(raw_payloads, list)
+        or len(raw_payloads) > 12
+    ):
+        return Response(
+            {"detail": "Permintaan fallback tidak valid."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    clean_query = {}
+    for key, value in query.items():
+        if not isinstance(key, str) or not isinstance(value, str):
+            return Response(
+                {"detail": "Parameter fallback tidak valid."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        clean_query[key] = value
+
+    prefetched = {}
+    for item in raw_payloads:
+        if not isinstance(item, dict):
+            return Response(
+                {"detail": "Data fallback tidak valid."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        path = item.get("path")
+        params = item.get("params") or {}
+        data = item.get("data")
+        if (
+            not isinstance(path, str)
+            or not path.startswith(("/comic/", "/anime/"))
+            or len(path) > 1000
+            or not isinstance(params, dict)
+            or any(
+                not isinstance(key, str) or not isinstance(value, str)
+                for key, value in params.items()
+            )
+            or not isinstance(data, (dict, list))
+        ):
+            return Response(
+                {"detail": "Data fallback tidak valid."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        prefetched[services.upstream_key(path, params)] = data
+
+    try:
+        match = resolve(f"/api{api_path}")
+    except Resolver404:
+        match = None
+    if match is None or match.url_name not in SANKA_FALLBACK_VIEWS:
+        return Response(
+            {"detail": "Rute fallback tidak didukung."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    raw_request = request._request
+    original_method = raw_request.method
+    original_query = raw_request.GET
+    fallback_query = QueryDict(mutable=True)
+    fallback_query.update(clean_query)
+    raw_request.method = "GET"
+    raw_request.GET = fallback_query
+    try:
+        with services.prefetched_api_data(prefetched) as missing:
+            response = match.func(raw_request, *match.args, **match.kwargs)
+        if missing:
+            return Response(
+                {"missing": missing},
+                status=status.HTTP_428_PRECONDITION_REQUIRED,
+            )
+        return response
+    finally:
+        raw_request.method = original_method
+        raw_request.GET = original_query
 
 
 @api_view(["GET"])

@@ -4,6 +4,7 @@ from . import views
 
 urlpatterns = [
     path("health/", views.health, name="health"),
+    path("upstream-fallback/", views.upstream_fallback, name="upstream-fallback"),
     path("sitemap.xml", views.sitemap, name="sitemap"),
     # accounts
     path("auth/register/", views.register, name="register"),

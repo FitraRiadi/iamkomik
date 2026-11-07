@@ -5,6 +5,8 @@ import hashlib
 import json
 import logging
 import re
+from contextlib import contextmanager
+from contextvars import ContextVar
 from datetime import timedelta
 from urllib.parse import quote, urlparse
 
@@ -13,6 +15,13 @@ from django.conf import settings
 from django.core.cache import cache
 
 logger = logging.getLogger("core")
+
+_prefetched_data: ContextVar[dict[str, object] | None] = ContextVar(
+    "sanka_prefetched_data", default=None
+)
+_prefetched_missing: ContextVar[list[dict] | None] = ContextVar(
+    "sanka_prefetched_missing", default=None
+)
 
 _session = requests.Session()
 _session.headers.update(
@@ -33,7 +42,17 @@ class UpstreamError(Exception):
 def api_get(path: str, params: dict | None = None, ttl: int | None = None):
     """GET ke Sanka API dengan cache in-memory sederhana."""
     ttl = settings.SANKAA_CACHE_TTL if ttl is None else ttl
-    key = _cache_key(path, params)
+    key = upstream_key(path, params)
+    prefetched = _prefetched_data.get()
+    if prefetched is not None:
+        if key in prefetched:
+            return prefetched[key]
+        missing = _prefetched_missing.get()
+        request = {"path": path, "params": params or {}}
+        if missing is not None and request not in missing:
+            missing.append(request)
+        raise UpstreamError("Data sumber belum tersedia untuk permintaan ini.")
+
     cached = cache.get(key)
     if cached is not None:
         return cached
@@ -82,10 +101,26 @@ def api_get(path: str, params: dict | None = None, ttl: int | None = None):
     return data
 
 
-def _cache_key(path: str, params: dict | None) -> str:
+def upstream_key(path: str, params: dict | None = None) -> str:
     raw = path + "|" + json.dumps(params or {}, sort_keys=True, default=str)
     digest = hashlib.sha1(raw.encode("utf-8")).hexdigest()
     return f"sanka:{digest}"
+
+
+@contextmanager
+def prefetched_api_data(payloads: dict[str, object]):
+    missing: list[dict] = []
+    data_token = _prefetched_data.set(payloads)
+    missing_token = _prefetched_missing.set(missing)
+    try:
+        yield missing
+    finally:
+        _prefetched_missing.reset(missing_token)
+        _prefetched_data.reset(data_token)
+
+
+def prefetched_data_incomplete() -> bool:
+    return bool(_prefetched_missing.get())
 
 
 # ---------------------------------------------------------------------------
