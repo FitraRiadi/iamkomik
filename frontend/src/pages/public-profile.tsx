@@ -4,10 +4,12 @@ import {
   ArrowLeft,
   ArrowUpRight,
   BookOpen,
+  Check,
   Flame,
   GraduationCap,
   Heart,
   ListMusic,
+  Lock,
   MessageCircle,
   Sparkles,
 } from "lucide-react"
@@ -22,6 +24,7 @@ import { useApiQuery } from "@/hooks/use-api-query"
 import { formatDate } from "@/lib/format"
 import { useI18n } from "@/lib/i18n"
 import type { PublicProfile } from "@/lib/types"
+import { cn } from "@/lib/utils"
 
 const badgeIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   first_read: BookOpen,
@@ -61,6 +64,9 @@ export function PublicProfilePage() {
     { label: t("Komentar"), value: data.stats.comments },
     { label: t("Streak"), value: t("{count} hari", { count: data.stats.streak_days }) },
   ]
+  const badgeCatalog = data.badge_catalog?.length
+    ? data.badge_catalog
+    : data.badges.map((badge) => ({ ...badge, description: "", earned: true }))
 
   return (
     <PageTransition>
@@ -101,19 +107,63 @@ export function PublicProfilePage() {
             </div>
           </div>
 
-          {data.badges.length > 0 ? (
+          {badgeCatalog.length > 0 ? (
             <div className="relative mt-6">
-              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
-                {t("Lencana")}
-              </p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {data.badges.map((badge) => {
+              <div className="flex flex-wrap items-end justify-between gap-2">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+                    {t("Lencana")}
+                  </p>
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    {t("Lencana terbuka otomatis dari aktivitas membaca Anda.")}
+                  </p>
+                </div>
+                <Badge variant="outline" className="text-[10px]">
+                  {t("{earned} dari {total} terbuka", {
+                    earned: data.badges.length,
+                    total: badgeCatalog.length,
+                  })}
+                </Badge>
+              </div>
+              <div className="mt-3 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+                {badgeCatalog.map((badge) => {
                   const Icon = badgeIcons[badge.id] ?? Sparkles
                   return (
-                    <Badge key={badge.id} variant="soft" className="gap-1.5 px-3 py-1.5">
-                      <Icon className="h-3.5 w-3.5" />
-                      {t(badge.label)}
-                    </Badge>
+                    <div
+                      key={badge.id}
+                      className={cn(
+                        "flex items-start gap-3 rounded-xl border p-3",
+                        badge.earned
+                          ? "border-primary/30 bg-primary/5"
+                          : "border-border/60 bg-background/40",
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "grid h-8 w-8 shrink-0 place-items-center rounded-full",
+                          badge.earned
+                            ? "bg-primary/10 text-primary"
+                            : "bg-muted text-muted-foreground",
+                        )}
+                      >
+                        <Icon className="h-4 w-4" />
+                      </span>
+                      <div className="min-w-0">
+                        <p className="flex items-center gap-1.5 text-sm font-bold">
+                          <span className={badge.earned ? "" : "text-muted-foreground"}>
+                            {t(badge.label)}
+                          </span>
+                          {badge.earned ? (
+                            <Check className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                          ) : (
+                            <Lock className="h-3 w-3 shrink-0 text-muted-foreground" />
+                          )}
+                        </p>
+                        <p className="mt-0.5 text-[11px] leading-relaxed text-muted-foreground">
+                          {t(badge.description)}
+                        </p>
+                      </div>
+                    </div>
                   )
                 })}
               </div>

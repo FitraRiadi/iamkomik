@@ -112,6 +112,12 @@ export interface PublicProfile {
   joined_at: string
   is_me: boolean
   badges: Array<{ id: string; label: string }>
+  badge_catalog: Array<{
+    id: string
+    label: string
+    description: string
+    earned: boolean
+  }>
   stats: {
     favorites: number
     chapters_read: number

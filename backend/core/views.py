@@ -185,6 +185,35 @@ def reader_top_anime_genres(reader, limit: int = 2) -> list[str]:
     return [name for name, _ in counter.most_common(limit)]
 
 
+BADGE_CATALOG = [
+    {
+        "id": "first_read",
+        "label": "Pembaca Baru",
+        "description": "Baca minimal 1 chapter.",
+    },
+    {
+        "id": "collector",
+        "label": "Kolektor",
+        "description": "Simpan minimal 5 komik ke favorit.",
+    },
+    {
+        "id": "streak_7",
+        "label": "Streak 7 Hari",
+        "description": "Baca 7 hari berturut-turut.",
+    },
+    {
+        "id": "bookworm",
+        "label": "Kutu Buku",
+        "description": "Baca minimal 50 chapter.",
+    },
+    {
+        "id": "discussion",
+        "label": "Diskusi Aktif",
+        "description": "Tulis minimal 3 komentar.",
+    },
+]
+
+
 def reader_badges(reader) -> list[dict]:
     if reader is None:
         return []
@@ -209,6 +238,14 @@ def reader_badges(reader) -> list[dict]:
     if comments >= 3:
         badges.append({"id": "discussion", "label": "Diskusi Aktif"})
     return badges
+
+
+def reader_badge_catalog(earned: list[dict]) -> list[dict]:
+    earned_ids = {badge["id"] for badge in earned}
+    return [
+        {**badge, "earned": badge["id"] in earned_ids}
+        for badge in BADGE_CATALOG
+    ]
 
 
 # ---------------------------------------------------------------------------
@@ -487,6 +524,7 @@ def public_profile(request, user_id: int):
         else []
     )
     streak = compute_streak([timezone.localtime(value).date() for value in dates])
+    earned_badges = reader_badges(reader)
     current_user = getattr(request, "user", None)
     return Response(
         {
@@ -496,7 +534,8 @@ def public_profile(request, user_id: int):
             "bio": reader.bio if reader else "",
             "joined_at": target.date_joined.isoformat(),
             "is_me": bool(current_user and current_user.id == target.id),
-            "badges": reader_badges(reader),
+            "badges": earned_badges,
+            "badge_catalog": reader_badge_catalog(earned_badges),
             "stats": {
                 "favorites": favorites,
                 "chapters_read": chapters,

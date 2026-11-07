@@ -1,12 +1,13 @@
 import { Link } from "react-router-dom"
 import { motion } from "framer-motion"
-import { ArrowRight, Bookmark, BookOpen, Clock3, History, Trash2 } from "lucide-react"
+import { ArrowRight, Bookmark, BookOpen, Clock3, History, ListMusic, Trash2 } from "lucide-react"
 
 import { ComicCard } from "@/components/comic-card"
 import { EmptyState } from "@/components/empty-state"
 import { AnimeHighlightBackdrop } from "@/components/highlight-backdrop"
 import { MasonryGrid } from "@/components/masonry-grid"
 import { PageTransition } from "@/components/page-transition"
+import { ProfilePlaylists } from "@/components/profile-playlists"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -66,6 +67,10 @@ export function LibraryPage() {
                 <span className="rounded-full bg-background/70 px-1.5 py-0.5 text-[10px] font-bold">
                   {history.length}
                 </span>
+              </TabsTrigger>
+              <TabsTrigger value="playlists">
+                <ListMusic className="h-3.5 w-3.5" />
+                {t("Playlist")}
               </TabsTrigger>
             </TabsList>
 
@@ -184,6 +189,10 @@ export function LibraryPage() {
                 ))}
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="playlists">
+            <ProfilePlaylists />
           </TabsContent>
         </Tabs>
 

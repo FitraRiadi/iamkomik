@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom"
-import { ArrowUpRight, Github, Heart } from "lucide-react"
+import { ArrowUpRight, Github } from "lucide-react"
 
 import { useI18n } from "@/lib/i18n"
 
@@ -38,10 +38,16 @@ export function SiteFooter() {
           <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
             {t("Ruang baca komik dan anime dengan tampilan yang nyaman. Simpan favorit, lanjutkan bacaan, dan pantau kebiasaan membaca Anda dalam satu tempat.")}
           </p>
-          <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background px-3 py-1.5 text-[11px] font-semibold text-muted-foreground">
-            <Heart className="h-3.5 w-3.5 text-primary" />
-            {t("Dibuat untuk tugas dan portofolio")}
-          </div>
+          <a
+            href="https://github.com/FitraRiadi"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background px-3 py-1.5 text-[11px] font-semibold text-muted-foreground transition hover:border-primary/40 hover:text-foreground"
+          >
+            <Github className="h-3.5 w-3.5 text-primary" />
+            {t("Dibuat oleh Fitra Riadi · Tugas & portofolio")}
+            <ArrowUpRight className="h-3 w-3" />
+          </a>
         </div>
 
         <div>
@@ -104,13 +110,13 @@ export function SiteFooter() {
               React + Django + PostgreSQL
             </span>
             <a
-              href="https://github.com/SankaVollereii/Rest-Api-Anime-and-Comic"
+              href="https://github.com/FitraRiadi"
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-1 transition hover:text-foreground"
             >
               <Github className="h-3.5 w-3.5" />
-              API
+              GitHub
             </a>
           </div>
         </div>

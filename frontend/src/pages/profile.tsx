@@ -117,7 +117,7 @@ export function ProfilePage() {
             {user ? (
               <Button asChild variant="outline" size="sm" className="shrink-0">
                 <Link to={`/u/${user.id}`}>
-                  {t("Lihat profil publik")}
+                  {t("Profil publik & lencana")}
                   <ArrowUpRight className="h-3.5 w-3.5" />
                 </Link>
               </Button>

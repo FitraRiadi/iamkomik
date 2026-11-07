@@ -50,7 +50,9 @@ const translations: Record<string, string> = {
   "Repo sumber API": "API source repo",
   "Ruang baca komik dan anime dengan tampilan yang nyaman. Simpan favorit, lanjutkan bacaan, dan pantau kebiasaan membaca Anda dalam satu tempat.":
     "A comic & anime reading space with a clean, easy-on-the-eyes layout. Save favorites, continue reading, and track your reading habits in one place.",
-  "Dibuat untuk tugas dan portofolio": "Built for a school project & portfolio",
+  "Dibuat oleh Fitra Riadi · Tugas & portofolio":
+    "Built by Fitra Riadi · School project & portfolio",
+  "Profil publik & lencana": "Public profile & badges",
   Jelajahi: "Explore",
   "Sumber & info": "Sources & info",
   "Data komik dan anime dari Sanka API.": "Comic & anime data from Sanka API.",
@@ -509,6 +511,14 @@ const translations: Record<string, string> = {
   "Streak 7 Hari": "7-Day Streak",
   "Kutu Buku": "Bookworm",
   "Diskusi Aktif": "Active Discussant",
+  "Lencana terbuka otomatis dari aktivitas membaca Anda.":
+    "Badges unlock automatically from your reading activity.",
+  "{earned} dari {total} terbuka": "{earned} of {total} unlocked",
+  "Baca minimal 1 chapter.": "Read at least 1 chapter.",
+  "Simpan minimal 5 komik ke favorit.": "Save at least 5 comics to favorites.",
+  "Baca 7 hari berturut-turut.": "Read 7 days in a row.",
+  "Baca minimal 50 chapter.": "Read at least 50 chapters.",
+  "Tulis minimal 3 komentar.": "Write at least 3 comments.",
   "Playlist publik": "Public playlists",
   "Koleksi {name}": "{name}'s collection",
   "Belum ada playlist publik": "No public playlists yet",
