@@ -10,6 +10,10 @@
       "destination": "https://iamkomik-api.vercel.app/api/sitemap.xml"
     },
     {
+      "source": "/__sanka/:path*",
+      "destination": "https://www.sankavollerei.web.id/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
