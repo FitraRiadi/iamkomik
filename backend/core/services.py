@@ -9,41 +9,18 @@ from datetime import timedelta
 from urllib.parse import urlparse
 
 import requests
-
-try:
-    from curl_cffi import requests as curl_requests
-except ImportError:  # pragma: no cover - local fallback
-    curl_requests = None
-
 from django.conf import settings
 from django.core.cache import cache
 
 logger = logging.getLogger("core")
 
-
-def _build_session():
-    if curl_requests is not None:
-        # Sanka sits behind Cloudflare; a browser TLS fingerprint avoids the bot challenge.
-        session = curl_requests.Session(impersonate="chrome")
-        session.headers.update(
-            {
-                "Accept": "application/json",
-                "Accept-Language": "id-ID,id;q=0.9,en;q=0.8",
-                "Referer": "https://iamkomik.vercel.app/",
-            }
-        )
-        return session
-    session = requests.Session()
-    session.headers.update(
-        {
-            "User-Agent": "IamKomik/1.0 (+local development)",
-            "Accept": "application/json",
-        }
-    )
-    return session
-
-
-_session = _build_session()
+_session = requests.Session()
+_session.headers.update(
+    {
+        "User-Agent": "IamKomik/1.0 (+local development)",
+        "Accept": "application/json",
+    }
+)
 
 
 class UpstreamError(Exception):
@@ -64,9 +41,9 @@ def api_get(path: str, params: dict | None = None, ttl: int | None = None):
     url = f"{settings.SANKAA_API_BASE}{path}"
     try:
         response = _session.get(url, params=params, timeout=settings.SANKAA_TIMEOUT)
-    except Exception as exc:
-        if "timeout" in str(exc).lower():
-            raise UpstreamError("Sumber data timeout. Coba lagi sebentar.", 504) from exc
+    except requests.Timeout as exc:
+        raise UpstreamError("Sumber data timeout. Coba lagi sebentar.", 504) from exc
+    except requests.RequestException as exc:
         raise UpstreamError("Tidak bisa menghubungi sumber data.", 502) from exc
 
     if response.status_code >= 400:
