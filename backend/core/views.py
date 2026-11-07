@@ -1287,7 +1287,13 @@ def anime_server(request, server_id: str):
 
 @api_view(["GET"])
 def health(request):
-    return Response({"status": "ok", "service": "iamkomik-api"})
+    return Response(
+        {
+            "status": "ok",
+            "service": "iamkomik-api",
+            "upstream_client": type(services._session).__module__,
+        }
+    )
 
 
 def sitemap(request):
