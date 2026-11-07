@@ -3,6 +3,7 @@ from __future__ import annotations
 import uuid
 from collections import Counter
 from datetime import timedelta
+from xml.sax.saxutils import escape
 
 import requests
 from django.conf import settings
@@ -11,6 +12,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db import transaction
+from django.http import HttpResponse
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.authtoken.models import Token
@@ -1247,3 +1249,37 @@ def anime_server(request, server_id: str):
 @api_view(["GET"])
 def health(request):
     return Response({"status": "ok", "service": "iamkomik-api"})
+
+
+def sitemap(request):
+    base = settings.SITE_URL
+    paths = ["/", "/jelajah", "/anime"]
+
+    try:
+        paths.extend(
+            f"/komik/{card['slug']}"
+            for card in services.get_all_comics()
+            if card.get("slug")
+        )
+    except services.UpstreamError:
+        pass
+
+    try:
+        paths.extend(
+            f"/anime/{card['id']}" for card in services.get_all_anime() if card.get("id")
+        )
+    except services.UpstreamError:
+        pass
+
+    urls = "".join(
+        f"<url><loc>{escape(base + path)}</loc></url>"
+        for path in dict.fromkeys(paths)
+    )
+    xml = (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+        f"{urls}</urlset>"
+    )
+    response = HttpResponse(xml, content_type="application/xml")
+    response["Cache-Control"] = "public, max-age=3600"
+    return response

@@ -114,6 +114,7 @@ STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+SITE_URL = os.getenv("SITE_URL", "https://iamkomik.vercel.app").rstrip("/")
 SANKAA_API_BASE = os.getenv("SANKAA_API_BASE", "https://www.sankavollerei.web.id").rstrip("/")
 SANKAA_TIMEOUT = 15
 SANKAA_CACHE_TTL = 300

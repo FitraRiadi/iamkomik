@@ -176,6 +176,12 @@ def get_latest(limit: int = 24) -> list[dict]:
     return _dedupe([normalize_card(item) for item in items])[:limit]
 
 
+def get_all_comics() -> list[dict]:
+    data = api_get("/comic/unlimited", ttl=60 * 60 * 6)
+    items = data.get("comics", []) if isinstance(data, dict) else []
+    return _dedupe([normalize_card(item) for item in items if isinstance(item, dict)])
+
+
 def get_home() -> dict:
     trending = get_trending()
     latest = get_latest()
@@ -328,6 +334,26 @@ def get_anime_home() -> dict:
         "ongoing": [normalize_anime(item) for item in ongoing],
         "complete": [normalize_anime(item) for item in complete],
     }
+
+
+def get_all_anime() -> list[dict]:
+    data = api_get("/anime/unlimited", ttl=60 * 60 * 6)
+    payload = data.get("data", {}) if isinstance(data, dict) else {}
+    groups = payload.get("list") if isinstance(payload, dict) else []
+    seen = set()
+    cards = []
+    for group in groups or []:
+        if not isinstance(group, dict):
+            continue
+        for item in group.get("animeList") or []:
+            if not isinstance(item, dict):
+                continue
+            card = normalize_anime(item)
+            if not card["id"] or card["id"] in seen:
+                continue
+            seen.add(card["id"])
+            cards.append(card)
+    return cards
 
 
 def get_anime_genres() -> list[dict]:
