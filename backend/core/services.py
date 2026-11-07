@@ -330,6 +330,51 @@ def get_anime_home() -> dict:
     }
 
 
+def get_anime_genres() -> list[dict]:
+    data = api_get("/anime/genre", ttl=60 * 60 * 6)
+    payload = data.get("data", {}) if isinstance(data, dict) else {}
+    items = payload.get("genreList") if isinstance(payload, dict) else []
+    return [
+        {"name": item.get("title") or "", "slug": item.get("genreId") or ""}
+        for item in items or []
+        if isinstance(item, dict) and item.get("title") and item.get("genreId")
+    ]
+
+
+def get_anime_genre(genre: str, limit: int = 30) -> list[dict]:
+    data = api_get(f"/anime/genre/{genre}")
+    payload = data.get("data", {}) if isinstance(data, dict) else {}
+    items = payload.get("animeList") if isinstance(payload, dict) else []
+    seen = set()
+    cards = []
+    for item in items or []:
+        if not isinstance(item, dict):
+            continue
+        card = normalize_anime(item)
+        if not card["id"] or card["id"] in seen:
+            continue
+        seen.add(card["id"])
+        cards.append(card)
+    return cards[:limit]
+
+
+def get_anime_for_you(genres: list[str], limit: int = 12) -> list[dict]:
+    cards = []
+    for genre in genres[:2]:
+        try:
+            cards.extend(get_anime_genre(genre, limit=8))
+        except UpstreamError:
+            continue
+    seen = set()
+    unique = []
+    for card in cards:
+        if not card["id"] or card["id"] in seen:
+            continue
+        seen.add(card["id"])
+        unique.append(card)
+    return unique[:limit]
+
+
 def get_anime_detail(anime_id: str) -> dict:
     data = api_get(f"/anime/anime/{anime_id}")
     payload = data.get("data", {}) if isinstance(data, dict) else {}
@@ -354,7 +399,8 @@ def get_anime_detail(anime_id: str) -> dict:
     else:
         synopsis_text = str(paragraphs or payload.get("synopsis") or "")
 
-    return {
+    genres = payload.get("genreList") or []
+    result = {
         "id": anime_id,
         "title": payload.get("title") or "",
         "poster": payload.get("poster") or "",
@@ -367,9 +413,28 @@ def get_anime_detail(anime_id: str) -> dict:
         "aired": payload.get("aired") or "",
         "studios": payload.get("studios") or "",
         "synopsis": synopsis_text,
-        "genres": payload.get("genreList") or [],
+        "genres": genres,
         "episodes": episodes,
+        "related": [],
     }
+    first_genre = next(
+        (
+            genre.get("genreId")
+            for genre in genres
+            if isinstance(genre, dict) and genre.get("genreId")
+        ),
+        "",
+    )
+    if first_genre:
+        try:
+            result["related"] = [
+                card
+                for card in get_anime_genre(first_genre, limit=10)
+                if card["id"] != anime_id
+            ][:8]
+        except UpstreamError:
+            pass
+    return result
 
 
 def search_anime(query: str) -> list[dict]:

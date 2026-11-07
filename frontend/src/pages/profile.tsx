@@ -1,9 +1,10 @@
 import * as React from "react"
 import { Link } from "react-router-dom"
-import { Camera, Loader2, Mail, Save, Target, Trash2, UserRound } from "lucide-react"
+import { ArrowUpRight, Camera, Loader2, Mail, Save, Target, Trash2, UserRound } from "lucide-react"
 import { toast } from "sonner"
 
 import { PageTransition } from "@/components/page-transition"
+import { ProfilePlaylists } from "@/components/profile-playlists"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -52,6 +53,7 @@ export function ProfilePage() {
   const { t } = useI18n()
   const [name, setName] = React.useState(user?.name ?? "")
   const [avatar, setAvatar] = React.useState(user?.avatar ?? "")
+  const [bio, setBio] = React.useState(user?.bio ?? "")
   const [weeklyGoal, setWeeklyGoal] = React.useState(String(user?.weekly_goal ?? 10))
   const [busy, setBusy] = React.useState(false)
   const [error, setError] = React.useState("")
@@ -89,7 +91,7 @@ export function ProfilePage() {
 
     setBusy(true)
     try {
-      await updateProfile({ name: name.trim(), avatar, weekly_goal: goal })
+      await updateProfile({ name: name.trim(), avatar, bio: bio.trim(), weekly_goal: goal })
       toast.success(t("Profil diperbarui"))
     } catch (requestError) {
       setError(getErrorMessage(requestError))
@@ -102,13 +104,25 @@ export function ProfilePage() {
     <PageTransition>
       <div className="container py-10 sm:py-14">
         <div className="mx-auto max-w-2xl">
-          <p className="eyebrow">{t("Akun")}</p>
-          <h1 className="headline mt-2 text-4xl text-balance sm:text-5xl">
-            {t("Profil Anda")}
-          </h1>
-          <p className="mt-2 max-w-lg text-sm leading-relaxed text-muted-foreground">
-            {t("Atur nama dan foto profil yang tampil di akun IamKomik.")}
-          </p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="eyebrow">{t("Akun")}</p>
+              <h1 className="headline mt-2 text-4xl text-balance sm:text-5xl">
+                {t("Profil Anda")}
+              </h1>
+              <p className="mt-2 max-w-lg text-sm leading-relaxed text-muted-foreground">
+                {t("Atur nama, bio, target baca, dan playlist yang tampil di akun IamKomik.")}
+              </p>
+            </div>
+            {user ? (
+              <Button asChild variant="outline" size="sm" className="shrink-0">
+                <Link to={`/u/${user.id}`}>
+                  {t("Lihat profil publik")}
+                  <ArrowUpRight className="h-3.5 w-3.5" />
+                </Link>
+              </Button>
+            ) : null}
+          </div>
 
           <form
             onSubmit={submit}
@@ -178,6 +192,21 @@ export function ProfilePage() {
               </label>
 
               <label className="block space-y-1.5">
+                <span className="flex items-center justify-between gap-2 text-xs font-bold text-foreground/80">
+                  <span>{t("Bio")}</span>
+                  <span className="text-[10px] font-medium text-muted-foreground">{bio.length}/280</span>
+                </span>
+                <textarea
+                  value={bio}
+                  onChange={(event) => setBio(event.target.value)}
+                  maxLength={280}
+                  rows={3}
+                  placeholder={t("Ceritakan sedikit tentang selera baca Anda.")}
+                  className="w-full resize-y rounded-xl border border-input bg-background px-3.5 py-3 text-sm leading-relaxed outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                />
+              </label>
+
+              <label className="block space-y-1.5">
                 <span className="text-xs font-bold text-foreground/80">
                   {t("Target baca mingguan")}
                 </span>
@@ -226,6 +255,8 @@ export function ProfilePage() {
               </Button>
             </div>
           </form>
+
+          <ProfilePlaylists />
         </div>
       </div>
     </PageTransition>

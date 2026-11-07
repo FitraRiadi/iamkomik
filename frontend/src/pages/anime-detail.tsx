@@ -13,13 +13,16 @@ import {
   Tv,
 } from "lucide-react"
 
+import { CommentSection } from "@/components/comment-section"
 import { EmptyState } from "@/components/empty-state"
 import { PageTransition } from "@/components/page-transition"
+import { SectionHeading } from "@/components/section-heading"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useApiQuery } from "@/hooks/use-api-query"
 import { useI18n } from "@/lib/i18n"
+import { AnimeCard } from "@/pages/anime-card"
 import type { AnimeDetail } from "@/lib/types"
 
 export function AnimeDetailPage() {
@@ -244,6 +247,27 @@ export function AnimeDetailPage() {
               </p>
             </div>
           </aside>
+        </div>
+
+        {(data.related ?? []).length > 0 ? (
+          <section className="mt-10">
+            <SectionHeading
+              eyebrow={t("Rekomendasi anime")}
+              title={t("Anime dengan kategori serupa")}
+              description={t("Pilihan lain dari kategori yang sama.")}
+              actionLabel={t("Lihat semua anime")}
+              actionHref="/anime"
+            />
+            <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+              {(data.related ?? []).map((anime, index) => (
+                <AnimeCard key={anime.id} anime={anime} index={index} />
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        <div className="mt-8">
+          <CommentSection targetType="anime" targetId={data.id} />
         </div>
       </div>
     </PageTransition>

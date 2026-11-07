@@ -12,6 +12,7 @@ export interface AuthUser {
   name: string
   email: string
   avatar: string
+  bio: string
   weekly_goal: number
   preferred_genres: string[]
 }
@@ -32,6 +33,7 @@ interface AuthContextValue {
   updateProfile: (data: {
     name?: string
     avatar?: string
+    bio?: string
     weekly_goal?: number
     preferred_genres?: string[]
   }) => Promise<AuthUser>
@@ -119,6 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async (data: {
       name?: string
       avatar?: string
+      bio?: string
       weekly_goal?: number
       preferred_genres?: string[]
     }) => {

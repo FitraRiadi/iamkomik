@@ -68,7 +68,49 @@ export interface HomePayload {
   spotlight: ComicCard[]
   for_you: ComicCard[]
   for_you_genres: string[]
+  anime_for_you: AnimeCard[]
+  anime_for_you_genres: string[]
   generated_at: string
+}
+
+export interface CommentItem {
+  id: number
+  target_type: "comic" | "anime"
+  target_id: string
+  body: string
+  created_at: string
+  author: {
+    id: number | null
+    name: string
+    avatar: string
+  }
+}
+
+export interface Playlist {
+  id: number
+  name: string
+  description: string
+  is_public: boolean
+  items: ComicCard[]
+  created_at: string
+  updated_at: string
+}
+
+export interface PublicProfile {
+  id: number
+  name: string
+  avatar: string
+  bio: string
+  joined_at: string
+  is_me: boolean
+  badges: Array<{ id: string; label: string }>
+  stats: {
+    favorites: number
+    chapters_read: number
+    comments: number
+    streak_days: number
+  }
+  playlists: Playlist[]
 }
 
 export interface Favorite {
@@ -150,6 +192,7 @@ export interface AnimeDetail {
   synopsis: string
   genres: Array<{ title: string; genreId: string; href: string }>
   episodes: Array<{ title: string; eps: number | null; date: string; id: string }>
+  related: AnimeCard[]
 }
 
 export interface AnimeEpisode {

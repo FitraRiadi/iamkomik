@@ -16,6 +16,7 @@ class Reader(models.Model):
     token = models.CharField(max_length=64, unique=True)
     display_name = models.CharField(max_length=80, blank=True, default="")
     avatar = models.TextField(blank=True, default="")  # shortcut: data URL, pindah ke object storage kalau avatar membesar
+    bio = models.CharField(max_length=280, blank=True, default="")
     weekly_goal = models.PositiveSmallIntegerField(default=10)
     preferred_genres = models.JSONField(default=list, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -67,6 +68,43 @@ class ReadingProgress(models.Model):
 
     def __str__(self):
         return f"{self.title} - {self.chapter_name}"
+
+
+class Playlist(models.Model):
+    reader = models.ForeignKey(Reader, on_delete=models.CASCADE, related_name="playlists")
+    name = models.CharField(max_length=80)
+    description = models.CharField(max_length=280, blank=True, default="")
+    is_public = models.BooleanField(default=True)
+    items = models.JSONField(default=list, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-updated_at"]
+
+    def __str__(self):
+        return self.name
+
+
+class Comment(models.Model):
+    class TargetType(models.TextChoices):
+        COMIC = "comic", "Comic"
+        ANIME = "anime", "Anime"
+
+    reader = models.ForeignKey(Reader, on_delete=models.CASCADE, related_name="comments")
+    target_type = models.CharField(max_length=10, choices=TargetType.choices)
+    target_id = models.CharField(max_length=255)
+    body = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["target_type", "target_id", "created_at"]),
+        ]
+
+    def __str__(self):
+        return self.body[:60]
 
 
 class ActivityEvent(models.Model):

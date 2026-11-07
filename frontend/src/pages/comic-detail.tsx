@@ -19,10 +19,12 @@ import {
 } from "lucide-react"
 
 import { ComicCard } from "@/components/comic-card"
+import { CommentSection } from "@/components/comment-section"
 import { EmptyState } from "@/components/empty-state"
 import { HighlightBackdrop } from "@/components/highlight-backdrop"
 import { MasonryGrid } from "@/components/masonry-grid"
 import { PageTransition } from "@/components/page-transition"
+import { PlaylistPicker } from "@/components/playlist-picker"
 import { SaveButton } from "@/components/save-button"
 import { SectionHeading } from "@/components/section-heading"
 import { Badge } from "@/components/ui/badge"
@@ -229,6 +231,16 @@ export function ComicDetailPage() {
                   }}
                   className="h-12 px-5 text-sm"
                 />
+                <PlaylistPicker
+                  comic={{
+                    slug: data.slug,
+                    title: data.title,
+                    image: data.image,
+                    chapter: data.latest_chapter?.name ?? "",
+                    type: data.type,
+                    genre: data.genres.map((genre) => genre.name).join(", "),
+                  }}
+                />
               </div>
             </div>
           </div>
@@ -359,6 +371,10 @@ export function ComicDetailPage() {
               </p>
             </div>
           </aside>
+        </div>
+
+        <div className="mt-8">
+          <CommentSection targetType="comic" targetId={data.slug} />
         </div>
 
         {data.similar.length > 0 ? (

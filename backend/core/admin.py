@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import ActivityEvent, Favorite, Reader, ReadingProgress
+from .models import ActivityEvent, Comment, Favorite, Playlist, Reader, ReadingProgress
 
 
 @admin.register(Reader)
@@ -28,3 +28,17 @@ class ActivityEventAdmin(admin.ModelAdmin):
     list_display = ("event_type", "comic_slug", "reader", "created_at")
     list_filter = ("event_type",)
     search_fields = ("comic_slug", "query")
+
+
+@admin.register(Playlist)
+class PlaylistAdmin(admin.ModelAdmin):
+    list_display = ("name", "reader", "is_public", "updated_at")
+    list_filter = ("is_public",)
+    search_fields = ("name", "reader__display_name", "reader__user__email")
+
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ("reader", "target_type", "target_id", "created_at")
+    list_filter = ("target_type",)
+    search_fields = ("target_id", "body", "reader__display_name")

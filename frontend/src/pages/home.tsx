@@ -28,6 +28,7 @@ import { useApiQuery } from "@/hooks/use-api-query"
 import { useLibrary } from "@/hooks/use-library"
 import { formatRelative } from "@/lib/format"
 import { useI18n } from "@/lib/i18n"
+import { AnimeCard } from "@/pages/anime-card"
 import type { ComicCard as ComicCardType, HomePayload } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
@@ -47,6 +48,7 @@ export function HomePage() {
   const spotlight = data?.spotlight ?? []
   const genres = data?.genres ?? []
   const forYou = data?.for_you ?? []
+  const animeForYou = data?.anime_for_you ?? []
 
   return (
     <PageTransition>
@@ -196,6 +198,23 @@ export function HomePage() {
                 <ComicCard key={comic.slug} comic={comic} index={index} />
               ))}
             </MasonryGrid>
+          </section>
+        ) : null}
+
+        {animeForYou.length > 0 ? (
+          <section className="py-8">
+            <SectionHeading
+              eyebrow={t("Untuk Anda")}
+              title={t("Anime untuk Anda")}
+              description={t("Dipilih dari kategori anime yang paling sering Anda tonton.")}
+              actionLabel={t("Jelajahi anime")}
+              actionHref="/anime"
+            />
+            <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+              {animeForYou.slice(0, 10).map((anime, index) => (
+                <AnimeCard key={anime.id} anime={anime} index={index} />
+              ))}
+            </div>
           </section>
         ) : null}
 

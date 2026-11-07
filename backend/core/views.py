@@ -19,8 +19,13 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from . import services
-from .models import ActivityEvent, Favorite, Reader, ReadingProgress
-from .serializers import FavoriteSerializer, ReadingProgressSerializer
+from .models import ActivityEvent, Comment, Favorite, Playlist, Reader, ReadingProgress
+from .serializers import (
+    CommentSerializer,
+    FavoriteSerializer,
+    PlaylistSerializer,
+    ReadingProgressSerializer,
+)
 
 READING_MINUTES_PER_CHAPTER = 6
 User = get_user_model()
@@ -110,12 +115,17 @@ def merge_reader(user, anonymous_token: str | None) -> Reader | None:
 
 def user_payload(user) -> dict:
     name = user.first_name or user.get_username()
-    reader = Reader.objects.filter(user=user).only("avatar", "weekly_goal", "preferred_genres").first()
+    reader = (
+        Reader.objects.filter(user=user)
+        .only("avatar", "bio", "weekly_goal", "preferred_genres")
+        .first()
+    )
     return {
         "id": user.id,
         "name": name,
         "email": user.email or user.get_username(),
         "avatar": reader.avatar if reader else "",
+        "bio": reader.bio if reader else "",
         "weekly_goal": reader.weekly_goal if reader else 10,
         "preferred_genres": reader.preferred_genres if reader else [],
     }
@@ -144,6 +154,59 @@ def split_genres(value: str) -> list[str]:
     if not value:
         return []
     return [part.strip() for part in value.replace("/", ",").split(",") if part.strip()]
+
+
+def reader_top_genres(reader, limit: int = 3) -> list[str]:
+    counter = Counter()
+    if reader:
+        for value in ReadingProgress.objects.filter(reader=reader).values_list("genre", flat=True):
+            counter.update(split_genres(value))
+        for value in Favorite.objects.filter(reader=reader).values_list("genre", flat=True):
+            counter.update(split_genres(value))
+    return [name for name, _ in counter.most_common(limit)]
+
+
+def reader_top_anime_genres(reader, limit: int = 2) -> list[str]:
+    counter = Counter()
+    if reader:
+        events = ActivityEvent.objects.filter(
+            reader=reader, event_type=ActivityEvent.EventType.ANIME_VIEW
+        ).order_by("-created_at")[:50]
+        for event in events:
+            genres = event.metadata.get("genres") if isinstance(event.metadata, dict) else []
+            if isinstance(genres, list):
+                counter.update(
+                    genre.strip().lower().replace(" ", "-")
+                    for genre in genres
+                    if isinstance(genre, str) and genre.strip()
+                )
+    return [name for name, _ in counter.most_common(limit)]
+
+
+def reader_badges(reader) -> list[dict]:
+    if reader is None:
+        return []
+    chapters = ActivityEvent.objects.filter(
+        reader=reader, event_type=ActivityEvent.EventType.CHAPTER_READ
+    ).count()
+    favorites = Favorite.objects.filter(reader=reader).count()
+    comments = Comment.objects.filter(reader=reader).count()
+    dates = ActivityEvent.objects.filter(
+        reader=reader, event_type=ActivityEvent.EventType.CHAPTER_READ
+    ).values_list("created_at", flat=True)
+    streak = compute_streak([timezone.localtime(value).date() for value in dates])
+    badges = []
+    if chapters >= 1:
+        badges.append({"id": "first_read", "label": "Pembaca Baru"})
+    if favorites >= 5:
+        badges.append({"id": "collector", "label": "Kolektor"})
+    if streak >= 7:
+        badges.append({"id": "streak_7", "label": "Streak 7 Hari"})
+    if chapters >= 50:
+        badges.append({"id": "bookworm", "label": "Kutu Buku"})
+    if comments >= 3:
+        badges.append({"id": "discussion", "label": "Diskusi Aktif"})
+    return badges
 
 
 # ---------------------------------------------------------------------------
@@ -323,6 +386,15 @@ def profile(request):
                 )
             reader.avatar = avatar
 
+        if "bio" in request.data:
+            bio = str(request.data.get("bio") or "").strip()
+            if len(bio) > 280:
+                return Response(
+                    {"detail": "Bio maksimal 280 karakter."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            reader.bio = bio
+
         if "weekly_goal" in request.data:
             try:
                 weekly_goal = int(request.data.get("weekly_goal"))
@@ -352,7 +424,15 @@ def profile(request):
                     cleaned.append(genre[:80])
             reader.preferred_genres = cleaned[:6]
 
-        reader.save(update_fields=["display_name", "avatar", "weekly_goal", "preferred_genres"])
+        reader.save(
+            update_fields=[
+                "display_name",
+                "avatar",
+                "bio",
+                "weekly_goal",
+                "preferred_genres",
+            ]
+        )
 
     return Response({"user": user_payload(request.user)})
 
@@ -376,6 +456,56 @@ def me(request):
     )
 
 
+@api_view(["GET"])
+def public_profile(request, user_id: int):
+    target = User.objects.filter(pk=user_id).first()
+    if target is None:
+        return Response({"detail": "Pengguna tidak ditemukan."}, status=status.HTTP_404_NOT_FOUND)
+
+    reader = Reader.objects.filter(user=target).first()
+    playlists = (
+        Playlist.objects.filter(reader=reader, is_public=True)
+        if reader
+        else Playlist.objects.none()
+    )
+    favorites = Favorite.objects.filter(reader=reader).count() if reader else 0
+    chapters = (
+        ActivityEvent.objects.filter(
+            reader=reader, event_type=ActivityEvent.EventType.CHAPTER_READ
+        ).count()
+        if reader
+        else 0
+    )
+    comments = Comment.objects.filter(reader=reader).count() if reader else 0
+    dates = (
+        ActivityEvent.objects.filter(
+            reader=reader, event_type=ActivityEvent.EventType.CHAPTER_READ
+        ).values_list("created_at", flat=True)
+        if reader
+        else []
+    )
+    streak = compute_streak([timezone.localtime(value).date() for value in dates])
+    current_user = getattr(request, "user", None)
+    return Response(
+        {
+            "id": target.id,
+            "name": target.first_name or target.get_username(),
+            "avatar": reader.avatar if reader else "",
+            "bio": reader.bio if reader else "",
+            "joined_at": target.date_joined.isoformat(),
+            "is_me": bool(current_user and current_user.id == target.id),
+            "badges": reader_badges(reader),
+            "stats": {
+                "favorites": favorites,
+                "chapters_read": chapters,
+                "comments": comments,
+                "streak_days": streak,
+            },
+            "playlists": PlaylistSerializer(playlists, many=True).data,
+        }
+    )
+
+
 # ---------------------------------------------------------------------------
 # Discovery
 # ---------------------------------------------------------------------------
@@ -388,8 +518,14 @@ def home(request):
 
     reader = get_reader(request)
     preferred = reader.preferred_genres if reader else []
-    payload["for_you"] = services.get_for_you(preferred) if preferred else []
-    payload["for_you_genres"] = preferred[:3]
+    for_you_genres = reader_top_genres(reader) or preferred[:3]
+    anime_genres = reader_top_anime_genres(reader) or preferred[:2]
+    payload["for_you"] = services.get_for_you(for_you_genres) if for_you_genres else []
+    payload["for_you_genres"] = for_you_genres
+    payload["anime_for_you"] = (
+        services.get_anime_for_you(anime_genres) if anime_genres else []
+    )
+    payload["anime_for_you_genres"] = anime_genres
     payload["generated_at"] = timezone.now().isoformat()
     log_event(reader, ActivityEvent.EventType.HOME_VIEW)
     return Response(payload)
@@ -657,6 +793,178 @@ def remove_history(request, slug: str):
 
 
 # ---------------------------------------------------------------------------
+# Comments
+# ---------------------------------------------------------------------------
+@api_view(["GET", "POST"])
+def comments(request):
+    if request.method == "GET":
+        target_type = (request.query_params.get("target_type") or "comic").strip()
+        target_id = (request.query_params.get("target_id") or "").strip()
+        if target_type not in dict(Comment.TargetType.choices) or not target_id:
+            return Response(
+                {"detail": "target_type dan target_id wajib diisi."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        items = (
+            Comment.objects.filter(target_type=target_type, target_id=target_id)
+            .select_related("reader", "reader__user")[:100]
+        )
+        return Response({"results": CommentSerializer(items, many=True).data})
+
+    reader = get_reader(request)
+    if reader is None:
+        return Response(
+            {"detail": "Silakan masuk untuk berkomentar."},
+            status=status.HTTP_401_UNAUTHORIZED,
+        )
+    target_type = (request.data.get("target_type") or "").strip()
+    target_id = (request.data.get("target_id") or "").strip()
+    body = (request.data.get("body") or "").strip()
+    if target_type not in dict(Comment.TargetType.choices) or not target_id:
+        return Response(
+            {"detail": "target_type dan target_id wajib diisi."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    if len(body) < 2 or len(body) > 1000:
+        return Response(
+            {"detail": "Komentar harus antara 2 dan 1000 karakter."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    comment = Comment.objects.create(
+        reader=reader,
+        target_type=target_type,
+        target_id=target_id[:255],
+        body=body,
+    )
+    return Response(CommentSerializer(comment).data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
+def delete_comment(request, comment_id: int):
+    reader = get_reader(request, create=False)
+    comment = Comment.objects.filter(pk=comment_id, reader=reader).first()
+    if comment is None:
+        return Response({"detail": "Komentar tidak ditemukan."}, status=status.HTTP_404_NOT_FOUND)
+    comment.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# ---------------------------------------------------------------------------
+# Playlists
+# ---------------------------------------------------------------------------
+@api_view(["GET", "POST"])
+@permission_classes([IsAuthenticated])
+def playlists(request):
+    reader = get_reader(request)
+    if reader is None:
+        return Response({"detail": "Reader tidak dikenal."}, status=status.HTTP_400_BAD_REQUEST)
+
+    if request.method == "GET":
+        return Response(
+            {"results": PlaylistSerializer(reader.playlists.all(), many=True).data}
+        )
+
+    name = (request.data.get("name") or "").strip()
+    if len(name) < 2:
+        return Response(
+            {"detail": "Nama playlist minimal 2 karakter."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    description = (request.data.get("description") or "").strip()
+    if len(description) > 280:
+        return Response(
+            {"detail": "Deskripsi playlist maksimal 280 karakter."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    is_public = request.data.get("is_public", True)
+    if isinstance(is_public, str):
+        is_public = is_public.lower() not in ("false", "0", "")
+    playlist = Playlist.objects.create(
+        reader=reader,
+        name=name[:80],
+        description=description,
+        is_public=bool(is_public),
+    )
+    return Response(PlaylistSerializer(playlist).data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["PATCH", "DELETE"])
+@permission_classes([IsAuthenticated])
+def playlist_detail(request, playlist_id: int):
+    reader = get_reader(request, create=False)
+    playlist = Playlist.objects.filter(pk=playlist_id, reader=reader).first()
+    if playlist is None:
+        return Response({"detail": "Playlist tidak ditemukan."}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == "DELETE":
+        playlist.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    if "name" in request.data:
+        name = (request.data.get("name") or "").strip()
+        if len(name) < 2:
+            return Response(
+                {"detail": "Nama playlist minimal 2 karakter."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        playlist.name = name[:80]
+    if "description" in request.data:
+        description = (request.data.get("description") or "").strip()
+        if len(description) > 280:
+            return Response(
+                {"detail": "Deskripsi playlist maksimal 280 karakter."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        playlist.description = description
+    if "is_public" in request.data:
+        is_public = request.data.get("is_public")
+        if isinstance(is_public, str):
+            is_public = is_public.lower() not in ("false", "0", "")
+        playlist.is_public = bool(is_public)
+    playlist.save()
+    return Response(PlaylistSerializer(playlist).data)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def playlist_items(request, playlist_id: int):
+    reader = get_reader(request, create=False)
+    playlist = Playlist.objects.filter(pk=playlist_id, reader=reader).first()
+    if playlist is None:
+        return Response({"detail": "Playlist tidak ditemukan."}, status=status.HTTP_404_NOT_FOUND)
+
+    slug = (request.data.get("slug") or "").strip()
+    if not slug:
+        return Response({"detail": "slug wajib diisi."}, status=status.HTTP_400_BAD_REQUEST)
+
+    items = [item for item in (playlist.items or []) if isinstance(item, dict)]
+    existing = next((item for item in items if item.get("slug") == slug), None)
+    if existing is not None:
+        items = [item for item in items if item.get("slug") != slug]
+        action = "removed"
+    else:
+        if len(items) >= 50:
+            return Response(
+                {"detail": "Playlist maksimal berisi 50 komik."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        items.append(
+            {
+                "slug": slug[:255],
+                "title": (request.data.get("title") or slug)[:255],
+                "image": (request.data.get("image") or "")[:1000],
+                "type": (request.data.get("type") or "")[:40],
+                "genre": (request.data.get("genre") or "")[:120],
+            }
+        )
+        action = "added"
+    playlist.items = items
+    playlist.save(update_fields=["items", "updated_at"])
+    return Response({"action": action, "playlist": PlaylistSerializer(playlist).data})
+
+
+# ---------------------------------------------------------------------------
 # Dashboard stats
 # ---------------------------------------------------------------------------
 def empty_stats() -> dict:
@@ -840,13 +1148,34 @@ def anime_detail(request, anime_id: str):
     except services.UpstreamError as exc:
         return upstream_error(exc)
 
+    genre_names = [
+        genre.get("genreId") or genre.get("title", "")
+        for genre in anime.get("genres", [])
+        if isinstance(genre, dict) and (genre.get("genreId") or genre.get("title"))
+    ]
     log_event(
         get_reader(request),
         ActivityEvent.EventType.ANIME_VIEW,
         title=anime["title"][:255],
-        metadata={"anime_id": anime_id},
+        metadata={"anime_id": anime_id, "genres": genre_names},
     )
     return Response(anime)
+
+
+@api_view(["GET"])
+def anime_genres(request):
+    try:
+        return Response({"results": services.get_anime_genres()})
+    except services.UpstreamError as exc:
+        return upstream_error(exc)
+
+
+@api_view(["GET"])
+def anime_genre(request, genre: str):
+    try:
+        return Response({"genre": genre, "results": services.get_anime_genre(genre)})
+    except services.UpstreamError as exc:
+        return upstream_error(exc)
 
 
 @api_view(["GET"])

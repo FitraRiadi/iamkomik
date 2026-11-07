@@ -1,5 +1,5 @@
 import * as React from "react"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate, useSearchParams } from "react-router-dom"
 import { Clapperboard, RefreshCw, Search, Sparkles } from "lucide-react"
 
 import { AnimeCard } from "@/pages/anime-card"
@@ -12,7 +12,12 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useApiQuery } from "@/hooks/use-api-query"
 import { useI18n } from "@/lib/i18n"
-import type { AnimeCard as AnimeCardType, AnimeHomePayload } from "@/lib/types"
+import { cn } from "@/lib/utils"
+import type {
+  AnimeCard as AnimeCardType,
+  AnimeHomePayload,
+  Genre,
+} from "@/lib/types"
 
 interface AnimeSearchPayload {
   results: AnimeCardType[]
@@ -29,11 +34,21 @@ export function AnimePage() {
     return () => window.clearTimeout(timer)
   }, [query])
 
+  const [searchParams, setSearchParams] = useSearchParams()
+  const genre = (searchParams.get("genre") || "").trim()
   const { data, loading, error, refetch } = useApiQuery<AnimeHomePayload>("/anime/home/")
+  const genresQuery = useApiQuery<{ results: Genre[] }>("/anime/genres/")
+  const genreQuery = useApiQuery<{ genre: string; results: AnimeCardType[] }>(
+    genre ? `/anime/genre/${encodeURIComponent(genre)}/` : null,
+  )
   const search = useApiQuery<AnimeSearchPayload>(
     debounced.length >= 2 ? `/anime/search/?q=${encodeURIComponent(debounced)}` : null,
   )
 
+  const genres = genresQuery.data?.results ?? []
+  const genreName =
+    genres.find((item) => item.slug === genre)?.name ||
+    genre.replace(/-/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase())
   const searching = debounced.length >= 2
   const results = search.data?.results ?? []
   const posters = React.useMemo(
@@ -98,6 +113,49 @@ export function AnimePage() {
           </div>
         </section>
 
+        <section className="pt-8">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="eyebrow">{t("Kategori anime")}</p>
+              <h2 className="headline mt-1 text-2xl">{t("Jelajahi anime berdasarkan genre")}</h2>
+            </div>
+            {genre ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSearchParams({})}
+                className="self-start sm:self-auto"
+              >
+                {t("Semua anime")}
+              </Button>
+            ) : null}
+          </div>
+          {genresQuery.loading ? (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {Array.from({ length: 10 }).map((_, index) => (
+                <Skeleton key={index} className="h-8 w-20 rounded-full" />
+              ))}
+            </div>
+          ) : genres.length > 0 ? (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {genres.map((item) => (
+                <Link
+                  key={item.slug}
+                  to={`/anime?genre=${encodeURIComponent(item.slug)}`}
+                  className={cn(
+                    "rounded-full border px-3.5 py-1.5 text-[11px] font-bold transition",
+                    genre === item.slug
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border/70 bg-card text-muted-foreground hover:border-primary/30 hover:bg-accent hover:text-accent-foreground",
+                  )}
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </div>
+          ) : null}
+        </section>
+
         {searching ? (
           <section className="py-10">
             <div className="mb-5 flex items-center justify-between">
@@ -124,6 +182,41 @@ export function AnimePage() {
             ) : (
               <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 {results.map((anime, index) => (
+                  <AnimeCard key={anime.id} anime={anime} index={index} />
+                ))}
+              </div>
+            )}
+          </section>
+        ) : genre ? (
+          <section className="py-10">
+            <SectionHeading
+              eyebrow={t("Kategori anime")}
+              title={t("Anime genre {genre}", { genre: genreName })}
+              description={t("Pilihan anime dari kategori ini.")}
+              actionLabel={t("Semua anime")}
+              actionHref="/anime"
+            />
+            {genreQuery.loading ? (
+              <AnimeGridSkeleton />
+            ) : genreQuery.error ? (
+              <EmptyState
+                icon={RefreshCw}
+                title={t("Gagal mengambil anime kategori ini")}
+                description={genreQuery.error}
+                actionLabel={t("Kembali ke semua anime")}
+                actionHref="/anime"
+              />
+            ) : (genreQuery.data?.results ?? []).length === 0 ? (
+              <EmptyState
+                icon={Sparkles}
+                title={t("Belum ada anime di kategori ini")}
+                description={t("Coba kategori lain atau kembali ke daftar anime.")}
+                actionLabel={t("Semua anime")}
+                actionHref="/anime"
+              />
+            ) : (
+              <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                {(genreQuery.data?.results ?? []).map((anime, index) => (
                   <AnimeCard key={anime.id} anime={anime} index={index} />
                 ))}
               </div>
