@@ -116,7 +116,13 @@
   }
 
   .headline {
-    @apply font-display font-bold tracking-[-0.035em];
+    @apply font-display tracking-[-0.035em];
+    font-weight: 400;
+    font-synthesis: none;
+  }
+
+  .font-display {
+    font-synthesis: none;
   }
 
   .link-underline {

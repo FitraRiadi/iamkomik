@@ -98,9 +98,9 @@ export function SiteHeader() {
             <img
               src="/brand-logo.png"
               alt=""
-              width={64}
-              height={64}
-              className="h-16 w-16 object-contain invert transition-transform group-hover:-rotate-6 dark:invert-0"
+              width={80}
+              height={80}
+              className="h-20 w-20 bg-transparent object-contain invert transition-transform group-hover:-rotate-6 dark:invert-0"
             />
             <span className="hidden font-display text-[28px] font-extrabold tracking-[-0.04em] sm:block">
               iamkomik<span className="text-primary">.</span>
