@@ -16,6 +16,8 @@ class Reader(models.Model):
     token = models.CharField(max_length=64, unique=True)
     display_name = models.CharField(max_length=80, blank=True, default="")
     avatar = models.TextField(blank=True, default="")  # shortcut: data URL, pindah ke object storage kalau avatar membesar
+    weekly_goal = models.PositiveSmallIntegerField(default=10)
+    preferred_genres = models.JSONField(default=list, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     last_seen_at = models.DateTimeField(default=timezone.now)
 

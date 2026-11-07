@@ -388,6 +388,50 @@ const translations: Record<string, string> = {
   "Simpan profil": "Save profile",
   "Menyimpan…": "Saving…",
   "Profil diperbarui": "Profile updated",
+  "Target baca mingguan": "Weekly reading goal",
+  "Jumlah chapter yang ingin Anda baca setiap minggu.":
+    "How many chapters you want to read each week.",
+  "Kategori favorit": "Favorite categories",
+  "Belum diatur.": "Not set yet.",
+  "Atur kategori": "Set categories",
+  "Atur target": "Set goal",
+  "Target mingguan harus antara 1 dan 100 chapter.":
+    "Weekly goal must be between 1 and 100 chapters.",
+  "Kenalan dulu": "Get to know you",
+  "Buat pengalaman baca yang pas untuk Anda.": "Build a reading experience that fits you.",
+  "Empat langkah singkat, lalu beranda akan menampilkan komik yang lebih sesuai dengan selera Anda.":
+    "Four quick steps, then your home page will show comics that better match your taste.",
+  Kategori: "Categories",
+  Target: "Goal",
+  Siap: "Ready",
+  "Langkah 1": "Step 1",
+  "Langkah 2": "Step 2",
+  "Langkah 3": "Step 3",
+  "Langkah 4": "Step 4",
+  "Mau dipanggil siapa?": "What should we call you?",
+  "Nama ini tampil di profil dan sapaan beranda.":
+    "This name appears on your profile and home greeting.",
+  "Nama panggilan": "Display name",
+  "Kategori apa yang Anda suka?": "Which categories do you like?",
+  "Pilih beberapa. Beranda akan memakai kategori ini untuk rekomendasi.":
+    "Pick a few. Your home page will use these categories for recommendations.",
+  "Memuat kategori…": "Loading categories…",
+  "Tentukan berapa chapter yang ingin Anda selesaikan setiap minggu.":
+    "Decide how many chapters you want to finish each week.",
+  "Atau isi sendiri": "Or enter your own",
+  "Profil siap!": "Profile ready!",
+  "Beranda Anda akan langsung menampilkan rekomendasi dari kategori pilihan.":
+    "Your home page will immediately show recommendations from your chosen categories.",
+  "{count} chapter per minggu": "{count} chapters per week",
+  Kembali: "Back",
+  "Masuk ke beranda": "Go to home",
+  "Profil siap. Selamat membaca!": "Profile ready. Happy reading!",
+  "Pilih minimal satu kategori.": "Pick at least one category.",
+  "Untuk Anda": "For you",
+  "Mungkin Anda suka": "You might like",
+  "Dipilih dari kategori favorit yang Anda pilih saat mendaftar.":
+    "Picked from the favorite categories you chose when signing up.",
+  "Jelajahi cepat": "Quick browse",
   "Email digunakan untuk masuk dan tidak dapat diubah dari halaman ini.":
     "Email is used to sign in and cannot be changed from this page.",
   "Avatar profil": "Profile avatar",

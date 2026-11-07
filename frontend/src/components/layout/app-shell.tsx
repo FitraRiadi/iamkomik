@@ -10,7 +10,10 @@ import { cn } from "@/lib/utils"
 export function AppShell({ children }: { children: React.ReactNode }) {
   const location = useLocation()
   const immersive = location.pathname.startsWith("/baca/")
-  const authPage = location.pathname === "/masuk" || location.pathname === "/daftar"
+  const authPage =
+    location.pathname === "/masuk" ||
+    location.pathname === "/daftar" ||
+    location.pathname === "/onboarding"
   const hideMobileNav = immersive || authPage
 
   return (

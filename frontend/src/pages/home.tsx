@@ -46,6 +46,7 @@ export function HomePage() {
 
   const spotlight = data?.spotlight ?? []
   const genres = data?.genres ?? []
+  const forYou = data?.for_you ?? []
 
   return (
     <PageTransition>
@@ -148,6 +149,8 @@ export function HomePage() {
           <HeroCollage comics={spotlight} loading={loading} />
         </section>
 
+        <AutoCarousel comics={spotlight} />
+
         {error ? (
           <div className="mb-10 flex flex-col items-start justify-between gap-3 rounded-[5px] border border-destructive/20 bg-destructive/5 px-5 py-4 sm:flex-row sm:items-center">
             <p className="text-sm font-medium text-destructive">{error}</p>
@@ -178,6 +181,23 @@ export function HomePage() {
             </MasonryGrid>
           )}
         </section>
+
+        {forYou.length > 0 ? (
+          <section className="py-8">
+            <SectionHeading
+              eyebrow={t("Untuk Anda")}
+              title={t("Mungkin Anda suka")}
+              description={t("Dipilih dari kategori favorit yang Anda pilih saat mendaftar.")}
+              actionLabel={t("Atur kategori")}
+              actionHref="/onboarding"
+            />
+            <MasonryGrid>
+              {forYou.slice(0, 12).map((comic, index) => (
+                <ComicCard key={comic.slug} comic={comic} index={index} />
+              ))}
+            </MasonryGrid>
+          </section>
+        ) : null}
 
         {spotlight.length > 0 ? <EditorCarousel comics={spotlight.slice(0, 5)} /> : null}
 
@@ -258,6 +278,48 @@ export function HomePage() {
         </div>
       </div>
     </PageTransition>
+  )
+}
+
+function AutoCarousel({ comics }: { comics: ComicCardType[] }) {
+  const { t } = useI18n()
+  const items = comics.slice(0, 10)
+  if (!items.length) return null
+
+  return (
+    <section className="pb-6 pt-2">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+          <Flame className="h-3.5 w-3.5 text-primary" />
+          {t("Jelajahi cepat")}
+        </div>
+        <Link
+          to="/jelajah"
+          className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:underline"
+        >
+          {t("Lihat semua")}
+          <ArrowUpRight className="h-3 w-3" />
+        </Link>
+      </div>
+      <div className="relative overflow-hidden py-1">
+        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-background to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-background to-transparent" />
+        <div className="flex w-max animate-marquee hover:[animation-play-state:paused] focus-within:[animation-play-state:paused]">
+          {[0, 1].map((copy) => (
+            <div key={copy} className="flex shrink-0 gap-3 pr-3" aria-hidden={copy === 1}>
+              {items.map((comic, index) => (
+                <div
+                  key={`${copy}-${comic.slug}-${index}`}
+                  className="w-[132px] shrink-0 sm:w-[156px]"
+                >
+                  <ComicCard comic={comic} index={index} showSave={false} />
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   )
 }
 

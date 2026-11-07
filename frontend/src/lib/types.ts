@@ -66,6 +66,8 @@ export interface HomePayload {
   latest: ComicCard[]
   genres: Genre[]
   spotlight: ComicCard[]
+  for_you: ComicCard[]
+  for_you_genres: string[]
   generated_at: string
 }
 

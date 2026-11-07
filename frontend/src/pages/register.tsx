@@ -23,11 +23,12 @@ export function RegisterPage() {
   const [confirm, setConfirm] = React.useState("")
   const [busy, setBusy] = React.useState(false)
   const [error, setError] = React.useState("")
+  const justRegistered = React.useRef(false)
 
   const next = searchParams.get("next") || "/koleksi"
 
   React.useEffect(() => {
-    if (user) navigate(next, { replace: true })
+    if (user && !justRegistered.current) navigate(next, { replace: true })
   }, [navigate, next, user])
 
   const submit = async (event: React.FormEvent) => {
@@ -56,10 +57,11 @@ export function RegisterPage() {
     }
 
     setBusy(true)
+    justRegistered.current = true
     try {
       await register(name.trim(), email.trim(), password)
       toast.success(t("Akun berhasil dibuat. Selamat membaca!"))
-      navigate(next, { replace: true })
+      navigate("/onboarding", { replace: true })
     } catch (requestError) {
       setError(getErrorMessage(requestError))
     } finally {
@@ -70,10 +72,11 @@ export function RegisterPage() {
   const handleGoogle = async (credential: string) => {
     setError("")
     setBusy(true)
+    justRegistered.current = true
     try {
-      await googleLogin(credential)
+      const account = await googleLogin(credential)
       toast.success(t("Akun berhasil dibuat. Selamat membaca!"))
-      navigate(next, { replace: true })
+      navigate(account.preferred_genres?.length ? next : "/onboarding", { replace: true })
     } catch (requestError) {
       setError(getErrorMessage(requestError))
     } finally {
@@ -93,9 +96,9 @@ export function RegisterPage() {
                 <img
                   src="/brand-logo.png"
                   alt=""
-                  width={40}
-                  height={40}
-                  className="h-10 w-10 rounded-[13px] object-cover"
+                  width={56}
+                  height={56}
+                  className="h-14 w-14 object-contain"
                 />
                 <span className="font-display text-2xl font-extrabold tracking-[-0.04em]">
                   iamkomik<span className="text-white/70">.</span>

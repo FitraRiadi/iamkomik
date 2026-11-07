@@ -5,7 +5,7 @@ from .models import ActivityEvent, Favorite, Reader, ReadingProgress
 
 @admin.register(Reader)
 class ReaderAdmin(admin.ModelAdmin):
-    list_display = ("token", "display_name", "user", "created_at", "last_seen_at")
+    list_display = ("token", "display_name", "user", "weekly_goal", "created_at", "last_seen_at")
     search_fields = ("token", "display_name", "user__email")
     raw_id_fields = ("user",)
 

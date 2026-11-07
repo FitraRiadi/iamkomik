@@ -12,6 +12,8 @@ export interface AuthUser {
   name: string
   email: string
   avatar: string
+  weekly_goal: number
+  preferred_genres: string[]
 }
 
 interface AuthResponse {
@@ -27,7 +29,12 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<AuthUser>
   register: (name: string, email: string, password: string) => Promise<AuthUser>
   googleLogin: (credential: string) => Promise<AuthUser>
-  updateProfile: (data: { name?: string; avatar?: string }) => Promise<AuthUser>
+  updateProfile: (data: {
+    name?: string
+    avatar?: string
+    weekly_goal?: number
+    preferred_genres?: string[]
+  }) => Promise<AuthUser>
   logout: () => Promise<void>
   refresh: () => Promise<void>
 }
@@ -109,7 +116,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   )
 
   const updateProfile = React.useCallback(
-    async (data: { name?: string; avatar?: string }) => {
+    async (data: {
+      name?: string
+      avatar?: string
+      weekly_goal?: number
+      preferred_genres?: string[]
+    }) => {
       const response = await api.patch<{ user: AuthUser }>("/auth/profile/", data)
       setUser(response.data.user)
       notifyAuthChanged()

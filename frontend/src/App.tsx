@@ -19,6 +19,7 @@ import { HomePage } from "@/pages/home"
 import { LibraryPage } from "@/pages/library"
 import { LoginPage } from "@/pages/login"
 import { NotFoundPage } from "@/pages/not-found"
+import { OnboardingPage } from "@/pages/onboarding"
 import { ProfilePage } from "@/pages/profile"
 import { ReaderPage } from "@/pages/reader"
 import { RegisterPage } from "@/pages/register"
@@ -53,6 +54,7 @@ export default function App() {
                     <Route path="/koleksi" element={<RequireAuth><LibraryPage /></RequireAuth>} />
                     <Route path="/dashboard" element={<RequireAuth><DashboardPage /></RequireAuth>} />
                     <Route path="/profil" element={<RequireAuth><ProfilePage /></RequireAuth>} />
+                    <Route path="/onboarding" element={<RequireAuth><OnboardingPage /></RequireAuth>} />
                     <Route path="/masuk" element={<LoginPage />} />
                     <Route path="/daftar" element={<RegisterPage />} />
                     <Route path="/anime" element={<AnimePage />} />

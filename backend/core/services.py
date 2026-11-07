@@ -212,6 +212,16 @@ def get_genre_comics(genre: str, limit: int = 40) -> list[dict]:
     return _dedupe(cards)[:limit]
 
 
+def get_for_you(genres: list[str], limit: int = 12) -> list[dict]:
+    cards = []
+    for genre in genres[:3]:
+        try:
+            cards.extend(get_genre_comics(genre, limit=8))
+        except UpstreamError:
+            continue
+    return _dedupe(cards)[:limit]
+
+
 def get_comic_detail(slug: str) -> dict:
     data = api_get(f"/comic/comic/{slug}")
     if not isinstance(data, dict) or not data.get("title"):

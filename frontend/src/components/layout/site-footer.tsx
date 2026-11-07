@@ -27,9 +27,9 @@ export function SiteFooter() {
             <img
               src="/brand-logo.png"
               alt=""
-              width={36}
-              height={36}
-              className="h-9 w-9 rounded-[13px] object-cover"
+              width={48}
+              height={48}
+              className="h-12 w-12 object-contain invert dark:invert-0"
             />
             <span className="font-display text-xl font-extrabold tracking-[-0.04em]">
               iamkomik<span className="text-primary">.</span>

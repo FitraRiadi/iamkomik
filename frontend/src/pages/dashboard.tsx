@@ -54,7 +54,7 @@ export function DashboardPage() {
   const lastChapter = history[0]
   const weekly = (data?.series ?? []).slice(-7).reduce((sum, item) => sum + item.Dibaca, 0)
   const dailyAverage = weekly ? (weekly / 7).toFixed(1) : "0"
-  const goal = 10
+  const goal = Math.max(1, Number(user?.weekly_goal) || 10)
   const chartSeries = React.useMemo(
     () =>
       (data?.series ?? []).map((item) => ({
@@ -325,6 +325,12 @@ export function DashboardPage() {
                       ? t("Target tercapai. Konsistensi Anda luar biasa.")
                       : t("Kurang {count} chapter lagi untuk mencapai target.", { count: goal - weekly })}
                   </p>
+                  <Link
+                    to="/profil"
+                    className="mt-2 inline-block text-[10px] font-bold text-primary hover:underline"
+                  >
+                    {t("Atur target")}
+                  </Link>
                 </div>
               </TremorCard>
 

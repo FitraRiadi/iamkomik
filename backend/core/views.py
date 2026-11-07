@@ -110,12 +110,14 @@ def merge_reader(user, anonymous_token: str | None) -> Reader | None:
 
 def user_payload(user) -> dict:
     name = user.first_name or user.get_username()
-    avatar = Reader.objects.filter(user=user).values_list("avatar", flat=True).first() or ""
+    reader = Reader.objects.filter(user=user).only("avatar", "weekly_goal", "preferred_genres").first()
     return {
         "id": user.id,
         "name": name,
         "email": user.email or user.get_username(),
-        "avatar": avatar,
+        "avatar": reader.avatar if reader else "",
+        "weekly_goal": reader.weekly_goal if reader else 10,
+        "preferred_genres": reader.preferred_genres if reader else [],
     }
 
 
@@ -321,7 +323,36 @@ def profile(request):
                 )
             reader.avatar = avatar
 
-        reader.save(update_fields=["display_name", "avatar"])
+        if "weekly_goal" in request.data:
+            try:
+                weekly_goal = int(request.data.get("weekly_goal"))
+            except (TypeError, ValueError):
+                return Response(
+                    {"detail": "Target mingguan harus berupa angka."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            if not 1 <= weekly_goal <= 100:
+                return Response(
+                    {"detail": "Target mingguan harus antara 1 dan 100 chapter."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            reader.weekly_goal = weekly_goal
+
+        if "preferred_genres" in request.data:
+            preferred = request.data.get("preferred_genres")
+            if not isinstance(preferred, list):
+                return Response(
+                    {"detail": "Kategori harus berupa daftar."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            cleaned = []
+            for value in preferred:
+                genre = str(value).strip()
+                if genre and genre not in cleaned:
+                    cleaned.append(genre[:80])
+            reader.preferred_genres = cleaned[:6]
+
+        reader.save(update_fields=["display_name", "avatar", "weekly_goal", "preferred_genres"])
 
     return Response({"user": user_payload(request.user)})
 
@@ -355,8 +386,12 @@ def home(request):
     except services.UpstreamError as exc:
         return upstream_error(exc)
 
+    reader = get_reader(request)
+    preferred = reader.preferred_genres if reader else []
+    payload["for_you"] = services.get_for_you(preferred) if preferred else []
+    payload["for_you_genres"] = preferred[:3]
     payload["generated_at"] = timezone.now().isoformat()
-    log_event(get_reader(request), ActivityEvent.EventType.HOME_VIEW)
+    log_event(reader, ActivityEvent.EventType.HOME_VIEW)
     return Response(payload)
 
 

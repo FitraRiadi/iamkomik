@@ -1,5 +1,6 @@
 import * as React from "react"
-import { Camera, Loader2, Mail, Save, Trash2, UserRound } from "lucide-react"
+import { Link } from "react-router-dom"
+import { Camera, Loader2, Mail, Save, Target, Trash2, UserRound } from "lucide-react"
 import { toast } from "sonner"
 
 import { PageTransition } from "@/components/page-transition"
@@ -51,11 +52,15 @@ export function ProfilePage() {
   const { t } = useI18n()
   const [name, setName] = React.useState(user?.name ?? "")
   const [avatar, setAvatar] = React.useState(user?.avatar ?? "")
+  const [weeklyGoal, setWeeklyGoal] = React.useState(String(user?.weekly_goal ?? 10))
   const [busy, setBusy] = React.useState(false)
   const [error, setError] = React.useState("")
   const fileInput = React.useRef<HTMLInputElement>(null)
 
   const initial = (name || user?.email || "I").trim().charAt(0).toUpperCase()
+  const preferredGenres = user?.preferred_genres ?? []
+  const genreLabel = (value: string) =>
+    value.replace(/-/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase())
 
   const pickAvatar = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -76,10 +81,15 @@ export function ProfilePage() {
       setError(t("Nama minimal 2 karakter."))
       return
     }
+    const goal = Number(weeklyGoal)
+    if (!Number.isInteger(goal) || goal < 1 || goal > 100) {
+      setError(t("Target mingguan harus antara 1 dan 100 chapter."))
+      return
+    }
 
     setBusy(true)
     try {
-      await updateProfile({ name: name.trim(), avatar })
+      await updateProfile({ name: name.trim(), avatar, weekly_goal: goal })
       toast.success(t("Profil diperbarui"))
     } catch (requestError) {
       setError(getErrorMessage(requestError))
@@ -166,6 +176,41 @@ export function ProfilePage() {
                   {t("Email digunakan untuk masuk dan tidak dapat diubah dari halaman ini.")}
                 </span>
               </label>
+
+              <label className="block space-y-1.5">
+                <span className="text-xs font-bold text-foreground/80">
+                  {t("Target baca mingguan")}
+                </span>
+                <div className="relative">
+                  <Target className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    type="number"
+                    min={1}
+                    max={100}
+                    value={weeklyGoal}
+                    onChange={(event) => setWeeklyGoal(event.target.value)}
+                    className="pl-10"
+                    required
+                  />
+                </div>
+                <span className="text-[11px] text-muted-foreground">
+                  {t("Jumlah chapter yang ingin Anda baca setiap minggu.")}
+                </span>
+              </label>
+
+              <div className="flex flex-col gap-3 rounded-xl border border-border/70 bg-secondary/40 p-3.5 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-foreground/80">{t("Kategori favorit")}</p>
+                  <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
+                    {preferredGenres.length
+                      ? preferredGenres.map(genreLabel).join(", ")
+                      : t("Belum diatur.")}
+                  </p>
+                </div>
+                <Button asChild variant="outline" size="sm" className="shrink-0">
+                  <Link to="/onboarding">{t("Atur kategori")}</Link>
+                </Button>
+              </div>
             </div>
 
             {error ? (

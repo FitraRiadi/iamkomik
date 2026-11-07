@@ -26,7 +26,10 @@ export function SitePrompts() {
     return () => window.removeEventListener(PROMPT_CHANGE_EVENT, update)
   }, [])
 
-  const authPage = location.pathname === "/masuk" || location.pathname === "/daftar"
+  const authPage =
+    location.pathname === "/masuk" ||
+    location.pathname === "/daftar" ||
+    location.pathname === "/onboarding"
   const showLogin = !authPage && cookieDone && !loading && !user && !loginDismissed
   const showInstall = !authPage && cookieDone && !loading && !showLogin
   const showCookie = !authPage && !cookieDone
