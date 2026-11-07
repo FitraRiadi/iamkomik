@@ -77,7 +77,7 @@ export function LoginPage() {
             <div className="relative flex h-full flex-col justify-between">
               <Link to="/" className="inline-flex items-center gap-2.5">
                 <img
-                  src="/brand-logo.png"
+                  src="/brand-logo-mark.png"
                   alt=""
                   width={56}
                   height={56}

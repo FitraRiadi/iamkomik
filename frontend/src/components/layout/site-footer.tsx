@@ -25,7 +25,7 @@ export function SiteFooter() {
         <div className="space-y-4">
           <Link to="/" className="inline-flex items-center gap-2.5">
             <img
-              src="/brand-logo.png"
+              src="/brand-logo-mark.png"
               alt=""
               width={48}
               height={48}

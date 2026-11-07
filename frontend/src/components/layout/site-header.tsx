@@ -96,7 +96,7 @@ export function SiteHeader() {
         <div className="container flex h-20 items-center gap-3">
           <Link to="/" className="group flex shrink-0 items-center gap-3">
             <img
-              src="/brand-logo.png"
+              src="/brand-logo-mark.png"
               alt=""
               width={80}
               height={80}
