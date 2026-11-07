@@ -6,7 +6,7 @@ import json
 import logging
 import re
 from datetime import timedelta
-from urllib.parse import urlparse
+from urllib.parse import quote, urlparse
 
 import requests
 from django.conf import settings
@@ -54,6 +54,21 @@ def api_get(path: str, params: dict | None = None, ttl: int | None = None):
             response.headers.get("cf-mitigated"),
             response.text[:200].replace("\n", " "),
         )
+        # Vercel egress IPs are challenged by Cloudflare; retry through the proxy.
+        proxy_base = getattr(settings, "SANKAA_PROXY_BASE", "")
+        if proxy_base and response.status_code in {403, 429, 500, 502, 503, 504}:
+            try:
+                proxy_response = _session.get(
+                    f"{proxy_base}{quote(response.url, safe='')}",
+                    timeout=settings.SANKAA_TIMEOUT,
+                )
+                proxy_response.raise_for_status()
+                data = proxy_response.json()
+                cache.set(key, data, ttl)
+                logger.warning("Upstream proxy fallback ok for %s", path)
+                return data
+            except (requests.RequestException, ValueError) as exc:
+                logger.warning("Upstream proxy fallback failed for %s: %s", path, exc)
         raise UpstreamError(
             "Sumber data sedang tidak tersedia untuk permintaan ini.", response.status_code
         )
