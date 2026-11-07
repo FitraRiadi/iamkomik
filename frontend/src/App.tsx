@@ -20,6 +20,7 @@ import { LibraryPage } from "@/pages/library"
 import { LoginPage } from "@/pages/login"
 import { NotFoundPage } from "@/pages/not-found"
 import { OnboardingPage } from "@/pages/onboarding"
+import { PlaylistDetailPage } from "@/pages/playlist-detail"
 import { ProfilePage } from "@/pages/profile"
 import { PublicProfilePage } from "@/pages/public-profile"
 import { ReaderPage } from "@/pages/reader"
@@ -56,6 +57,7 @@ export default function App() {
                     <Route path="/dashboard" element={<RequireAuth><DashboardPage /></RequireAuth>} />
                     <Route path="/profil" element={<RequireAuth><ProfilePage /></RequireAuth>} />
                     <Route path="/u/:userId" element={<PublicProfilePage />} />
+                    <Route path="/playlist/:playlistId" element={<PlaylistDetailPage />} />
                     <Route path="/onboarding" element={<RequireAuth><OnboardingPage /></RequireAuth>} />
                     <Route path="/masuk" element={<LoginPage />} />
                     <Route path="/daftar" element={<RegisterPage />} />

@@ -148,73 +148,86 @@ export function ProfilePlaylists() {
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
             {playlists.map((playlist) => (
-              <article key={playlist.id} className="rounded-xl border border-border/60 bg-background/60 p-3.5">
-                <div className="flex items-start justify-between gap-2">
+              <article
+                key={playlist.id}
+                className="relative rounded-xl border border-border/60 bg-background/60 transition hover:border-primary/30"
+              >
+                <Link
+                  to={`/playlist/${playlist.id}`}
+                  className="group block p-3.5 pr-20"
+                >
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-bold">{playlist.name}</p>
+                    <p className="truncate text-sm font-bold transition group-hover:text-primary">
+                      {playlist.name}
+                    </p>
                     {playlist.description ? (
                       <p className="mt-0.5 line-clamp-2 text-[11px] leading-relaxed text-muted-foreground">
                         {playlist.description}
                       </p>
                     ) : null}
                   </div>
-                  <div className="flex shrink-0 items-center gap-1">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-sm"
-                      aria-label={playlist.is_public ? t("Jadikan pribadi") : t("Jadikan publik")}
-                      onClick={() => void toggleVisibility(playlist)}
-                      disabled={busyId === playlist.id}
-                    >
-                      {playlist.is_public ? <Globe2 className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-sm"
-                      aria-label={t("Hapus playlist")}
-                      onClick={() => void remove(playlist)}
-                      disabled={busyId === playlist.id}
-                      className="text-muted-foreground"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                </div>
 
-                <div className="mt-3 flex items-center gap-2">
-                  <Badge variant="outline" className="gap-1 text-[10px]">
-                    {playlist.is_public ? <Globe2 className="h-2.5 w-2.5" /> : <Lock className="h-2.5 w-2.5" />}
-                    {playlist.is_public ? t("Publik") : t("Pribadi")}
-                  </Badge>
-                  <span className="text-[10px] text-muted-foreground">
-                    {t("{count} komik", { count: playlist.items.length })}
+                  <div className="mt-3 flex items-center gap-2">
+                    <Badge variant="outline" className="gap-1 text-[10px]">
+                      {playlist.is_public ? <Globe2 className="h-2.5 w-2.5" /> : <Lock className="h-2.5 w-2.5" />}
+                      {playlist.is_public ? t("Publik") : t("Pribadi")}
+                    </Badge>
+                    <span className="text-[10px] text-muted-foreground">
+                      {t("{count} komik", { count: playlist.items.length })}
+                    </span>
+                  </div>
+
+                  {playlist.items.length > 0 ? (
+                    <div className="mt-3 flex gap-1.5 overflow-hidden">
+                      {playlist.items.slice(0, 5).map((item) => (
+                        <div
+                          key={item.slug}
+                          className="block h-14 w-11 shrink-0 overflow-hidden rounded-md bg-muted"
+                          title={item.title}
+                        >
+                          {item.image ? (
+                            <img
+                              src={item.image}
+                              alt={item.title}
+                              loading="lazy"
+                              referrerPolicy="no-referrer"
+                              className="h-full w-full object-cover"
+                            />
+                          ) : null}
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+
+                  <span className="mt-3 inline-flex items-center gap-1 text-[10px] font-bold text-primary">
+                    {t("Buka playlist")}
+                    <ArrowUpRight className="h-3 w-3" />
                   </span>
-                </div>
+                </Link>
 
-                {playlist.items.length > 0 ? (
-                  <div className="mt-3 flex gap-1.5 overflow-hidden">
-                    {playlist.items.slice(0, 5).map((item) => (
-                      <Link
-                        key={item.slug}
-                        to={`/komik/${encodeURIComponent(item.slug)}`}
-                        className="block h-14 w-11 shrink-0 overflow-hidden rounded-md bg-muted"
-                        title={item.title}
-                      >
-                        {item.image ? (
-                          <img
-                            src={item.image}
-                            alt={item.title}
-                            loading="lazy"
-                            referrerPolicy="no-referrer"
-                            className="h-full w-full object-cover"
-                          />
-                        ) : null}
-                      </Link>
-                    ))}
-                  </div>
-                ) : null}
+                <div className="absolute right-3 top-3 flex shrink-0 items-center gap-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label={playlist.is_public ? t("Jadikan pribadi") : t("Jadikan publik")}
+                    onClick={() => void toggleVisibility(playlist)}
+                    disabled={busyId === playlist.id}
+                  >
+                    {playlist.is_public ? <Globe2 className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label={t("Hapus playlist")}
+                    onClick={() => void remove(playlist)}
+                    disabled={busyId === playlist.id}
+                    className="text-muted-foreground"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
               </article>
             ))}
           </div>

@@ -15,7 +15,7 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from . import services
@@ -887,6 +887,42 @@ def playlists(request):
         is_public=bool(is_public),
     )
     return Response(PlaylistSerializer(playlist).data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def public_playlist(request, playlist_id: int):
+    playlist = (
+        Playlist.objects.select_related("reader__user")
+        .filter(pk=playlist_id)
+        .first()
+    )
+    if playlist is None:
+        return Response(
+            {"detail": "Playlist tidak ditemukan."},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    current_user = getattr(request, "user", None)
+    is_owner = bool(
+        current_user
+        and current_user.is_authenticated
+        and playlist.reader.user_id == current_user.id
+    )
+    if not playlist.is_public and not is_owner:
+        return Response(
+            {"detail": "Playlist tidak ditemukan."},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    payload = PlaylistSerializer(playlist).data
+    owner = playlist.reader.user
+    payload["owner"] = {
+        "id": owner.id,
+        "name": owner.first_name or owner.get_username(),
+        "avatar": playlist.reader.avatar,
+    }
+    return Response(payload)
 
 
 @api_view(["PATCH", "DELETE"])

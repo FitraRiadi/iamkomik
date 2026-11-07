@@ -514,6 +514,16 @@ const translations: Record<string, string> = {
   "Belum ada playlist publik": "No public playlists yet",
   "Playlist yang dibagikan akan tampil di sini.": "Shared playlists will appear here.",
   "Playlist ini masih kosong.": "This playlist is still empty.",
+  "Buka playlist": "Open playlist",
+  "Kembali ke profil": "Back to profile",
+  "Atur playlist": "Manage playlist",
+  "Playlist tidak ditemukan": "Playlist not found",
+  "Playlist ini belum tersedia atau telah dihapus.":
+    "This playlist is unavailable or has been deleted.",
+  "Diperbarui {date}": "Updated {date}",
+  "Dibuat oleh": "Created by",
+  "Playlist kosong": "Playlist is empty",
+  "Belum ada komik di playlist ini.": "No comics in this playlist yet.",
   "Atur nama, bio, target baca, dan playlist yang tampil di akun IamKomik.":
     "Manage your name, bio, reading goal, and playlists on your IamKomik account.",
   Bio: "Bio",

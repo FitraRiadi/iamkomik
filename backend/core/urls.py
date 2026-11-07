@@ -33,6 +33,7 @@ urlpatterns = [
     path("comments/<int:comment_id>/", views.delete_comment, name="comment-delete"),
     path("playlists/", views.playlists, name="playlists"),
     path("playlists/<int:playlist_id>/", views.playlist_detail, name="playlist-detail"),
+    path("playlists/<int:playlist_id>/view/", views.public_playlist, name="playlist-view"),
     path("playlists/<int:playlist_id>/items/", views.playlist_items, name="playlist-items"),
     # stats
     path("stats/", views.stats, name="stats"),

@@ -2,6 +2,7 @@ import * as React from "react"
 import { Link, useParams } from "react-router-dom"
 import {
   ArrowLeft,
+  ArrowUpRight,
   BookOpen,
   Flame,
   GraduationCap,
@@ -150,10 +151,14 @@ export function PublicProfilePage() {
           ) : (
             <div className="grid gap-4 lg:grid-cols-2">
               {data.playlists.map((playlist) => (
-                <article key={playlist.id} className="rounded-[5px] border border-border/60 bg-card p-4 sm:p-5">
+                <Link
+                  key={playlist.id}
+                  to={`/playlist/${playlist.id}`}
+                  className="group block rounded-[5px] border border-border/60 bg-card p-4 transition hover:border-primary/30 sm:p-5"
+                >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <h3 className="headline text-lg">{playlist.name}</h3>
+                      <h3 className="headline text-lg transition group-hover:text-primary">{playlist.name}</h3>
                       {playlist.description ? (
                         <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                           {playlist.description}
@@ -168,11 +173,7 @@ export function PublicProfilePage() {
                   {playlist.items.length > 0 ? (
                     <div className="no-scrollbar mt-4 flex gap-2 overflow-x-auto pb-1">
                       {playlist.items.map((item) => (
-                        <Link
-                          key={item.slug}
-                          to={`/komik/${encodeURIComponent(item.slug)}`}
-                          className="group w-[92px] shrink-0"
-                        >
+                        <div key={item.slug} className="w-[92px] shrink-0">
                           <div className="aspect-[3/4] overflow-hidden rounded-md bg-muted">
                             {item.image ? (
                               <img
@@ -184,16 +185,21 @@ export function PublicProfilePage() {
                               />
                             ) : null}
                           </div>
-                          <p className="mt-1 line-clamp-2 text-[10px] font-semibold leading-snug group-hover:text-primary">
+                          <p className="mt-1 line-clamp-2 text-[10px] font-semibold leading-snug transition group-hover:text-primary">
                             {item.title}
                           </p>
-                        </Link>
+                        </div>
                       ))}
                     </div>
                   ) : (
                     <p className="mt-4 text-xs text-muted-foreground">{t("Playlist ini masih kosong.")}</p>
                   )}
-                </article>
+
+                  <span className="mt-3 inline-flex items-center gap-1 text-[10px] font-bold text-primary">
+                    {t("Buka playlist")}
+                    <ArrowUpRight className="h-3 w-3" />
+                  </span>
+                </Link>
               ))}
             </div>
           )}

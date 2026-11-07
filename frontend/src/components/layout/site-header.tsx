@@ -93,16 +93,16 @@ export function SiteHeader() {
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-border/60 glass">
-        <div className="container flex h-[68px] items-center gap-3">
-          <Link to="/" className="group flex shrink-0 items-center gap-2.5">
+        <div className="container flex h-20 items-center gap-3">
+          <Link to="/" className="group flex shrink-0 items-center gap-3">
             <img
               src="/brand-logo.png"
               alt=""
-              width={48}
-              height={48}
-              className="h-12 w-12 object-contain invert transition-transform group-hover:-rotate-6 dark:invert-0"
+              width={64}
+              height={64}
+              className="h-16 w-16 object-contain invert transition-transform group-hover:-rotate-6 dark:invert-0"
             />
-            <span className="hidden font-display text-[21px] font-extrabold tracking-[-0.04em] sm:block">
+            <span className="hidden font-display text-[28px] font-extrabold tracking-[-0.04em] sm:block">
               iamkomik<span className="text-primary">.</span>
             </span>
           </Link>

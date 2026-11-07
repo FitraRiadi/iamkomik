@@ -96,6 +96,14 @@ export interface Playlist {
   updated_at: string
 }
 
+export interface PlaylistDetail extends Playlist {
+  owner: {
+    id: number
+    name: string
+    avatar: string
+  }
+}
+
 export interface PublicProfile {
   id: number
   name: string
