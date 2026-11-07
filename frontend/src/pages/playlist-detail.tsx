@@ -31,7 +31,7 @@ export function PlaylistDetailPage() {
         <EmptyState
           icon={ListMusic}
           title={t("Playlist tidak ditemukan")}
-          description={error ?? t("Playlist ini belum tersedia atau telah dihapus.")}
+          description={t("Playlist ini belum tersedia atau telah dihapus.")}
           actionLabel={t("Kembali ke beranda")}
           actionHref="/"
         />
